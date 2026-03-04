@@ -1,0 +1,883 @@
+@model frontend.ViewModels.AdminPanelViewModel
+@{
+    ViewData["Title"] = "Админ панель";
+    Layout = "_Layout";
+
+    var categories = Model.Categories?.ToList() ?? new List<frontend.ViewModels.CategoryViewModel>();
+    var brands = Model.Brands?.ToList() ?? new List<frontend.ViewModels.BrandViewModel>();
+    var products = Model.Products?.Items?.ToList() ?? new List<frontend.ViewModels.ProductViewModel>();
+    var orders = Model.Orders?.Items?.ToList() ?? new List<frontend.ViewModels.AdminOrderListItemViewModel>();
+
+    var flattenedCategories = new List<(Guid Id, string Name)>();
+    void AddCategory(frontend.ViewModels.CategoryViewModel category, string prefix)
+    {
+        flattenedCategories.Add((category.Id, $"{prefix}{category.Name}"));
+        foreach (var sub in category.SubCategories.OrderBy(c => c.Name))
+        {
+            AddCategory(sub, $"{prefix}— ");
+        }
+    }
+    foreach (var category in categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name))
+    {
+        AddCategory(category, "");
+    }
+
+    var allCategories = new List<frontend.ViewModels.CategoryViewModel>();
+    void FlattenAll(frontend.ViewModels.CategoryViewModel cat)
+    {
+        allCategories.Add(cat);
+        foreach (var sub in cat.SubCategories) FlattenAll(sub);
+    }
+    foreach (var c in categories) FlattenAll(c);
+
+    string StatusName(int status) => status switch
+    {
+        0 => "Ожидает",
+        1 => "Подтверждён",
+        2 => "В сборке",
+        3 => "Отправлен",
+        4 => "Доставлен",
+        5 => "Отменён",
+        _ => "Неизвестно"
+    };
+
+    string StatusClass(int status) => status switch
+    {
+        0 => "status-pending",
+        1 => "status-confirmed",
+        2 => "status-processing",
+        3 => "status-shipped",
+        4 => "status-delivered",
+        5 => "status-cancelled",
+        _ => ""
+    };
+
+    string FilterTypeName(int ft) => ft switch
+    {
+        0 => "Кувшин",
+        1 => "Под мойку",
+        2 => "Обратный осмос",
+        3 => "Магистральный",
+        4 => "Насадка на кран",
+        5 => "Картридж",
+        6 => "Душ",
+        7 => "Умягчитель",
+        _ => "—"
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}
+
+<div class="adm-layout">
+    <!-- ───── Sidebar ───── -->
+    <aside class="adm-sidebar">
+        <div class="adm-sidebar-header">
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Админ-панель</span>
+        </div>
+
+        <nav class="adm-nav">
+            <button class="adm-nav-item @(Model.ActiveTab == "products" ? "active" : "")" data-tab="products">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="currentColor" stroke-width="2"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke="currentColor" stroke-width="2"/></svg>
+                Товары
+                <span class="adm-badge">@(Model.Products?.TotalCount ?? 0)</span>
+            </button>
+            <button class="adm-nav-item @(Model.ActiveTab == "users" ? "active" : "")" data-tab="users">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2-8 4.5V21h16v-2.5C20 16 16.4 14 12 14Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Пользователи
+                <span class="adm-badge">@Model.Users.Count</span>
+            </button>
+            <button class="adm-nav-item @(Model.ActiveTab == "categories" ? "active" : "")" data-tab="categories">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke="currentColor" stroke-width="2"/></svg>
+                Категории
+                <span class="adm-badge">@allCategories.Count</span>
+            </button>
+            <button class="adm-nav-item @(Model.ActiveTab == "brands" ? "active" : "")" data-tab="brands">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" stroke="currentColor" stroke-width="2"/><line x1="7" y1="7" x2="7.01" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Бренды
+                <span class="adm-badge">@brands.Count</span>
+            </button>
+            <button class="adm-nav-item @(Model.ActiveTab == "orders" ? "active" : "")" data-tab="orders">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2"/></svg>
+                Заказы
+                <span class="adm-badge">@(Model.Orders?.TotalCount ?? 0)</span>
+            </button>
+        </nav>
+
+        <a href="/account/profile" class="adm-back-link">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Назад в профиль
+        </a>
+    </aside>
+
+    <!-- ───── Main Content ───── -->
+    <main class="adm-main">
+
+        <!-- ═══════════ PRODUCTS TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "products" ? "active" : "")" id="tab-products">
+            <div class="adm-section-header">
+                <h1>Товары</h1>
+                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('productAddForm')">+ Добавить товар</button>
+            </div>
+
+            <!-- Add Product Form -->
+            <div id="productAddForm" class="adm-form-panel" style="display:none;">
+                <h3>Новый товар</h3>
+                <form asp-controller="Admin" asp-action="CreateProduct" method="post">
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="Name" required />
+                        </div>
+                        <div>
+                            <label>Артикул (SKU)</label>
+                            <input type="text" name="Sku" />
+                        </div>
+                        <div class="span-2">
+                            <label>Описание *</label>
+                            <textarea name="Description" rows="3" required></textarea>
+                        </div>
+                        <div class="span-2">
+                            <label>Краткое описание</label>
+                            <textarea name="ShortDescription" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label>Цена *</label>
+                            <input type="number" name="Price" min="0" step="0.01" required />
+                        </div>
+                        <div>
+                            <label>Старая цена</label>
+                            <input type="number" name="OldPrice" min="0" step="0.01" />
+                        </div>
+                        <div>
+                            <label>Тип фильтра</label>
+                            <select name="FilterType">
+                                @for (int i = 0; i <= 7; i++)
+                                {
+                                    <option value="@i">@FilterTypeName(i)</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Остаток</label>
+                            <input type="number" name="StockQuantity" min="0" value="0" />
+                        </div>
+                        <div>
+                            <label>Категория *</label>
+                            <select name="CategoryId" required>
+                                @foreach (var item in flattenedCategories)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Бренд *</label>
+                            <select name="BrandId" required>
+                                @foreach (var brand in brands.OrderBy(b => b.Name))
+                                {
+                                    <option value="@brand.Id">@brand.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Ресурс (мес.)</label>
+                            <input type="number" name="FilterLifespanMonths" min="0" />
+                        </div>
+                        <div>
+                            <label>Объем (л)</label>
+                            <input type="number" name="FilterCapacityLiters" min="0" />
+                        </div>
+                        <div>
+                            <label>Производительность (л/мин)</label>
+                            <input type="number" name="FlowRateLitersPerMinute" min="0" step="0.01" />
+                        </div>
+                        <div class="span-2">
+                            <label>Изображения (через запятую)</label>
+                            <textarea name="ImageUrls" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Добавить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('productAddForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Products Table -->
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Изображение</th>
+                            <th>Название</th>
+                            <th>Цена</th>
+                            <th>Категория</th>
+                            <th>Бренд</th>
+                            <th>Артикул</th>
+                            <th>Тип</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (products.Any())
+                        {
+                            @foreach (var p in products)
+                            {
+                                <tr>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(p.MainImageUrl))
+                                        {
+                                            <img class="adm-thumb" src="@p.MainImageUrl" alt="@p.Name" />
+                                        }
+                                        else
+                                        {
+                                            <div class="adm-thumb-placeholder">—</div>
+                                        }
+                                    </td>
+                                    <td><strong>@p.Name</strong></td>
+                                    <td class="adm-nowrap">
+                                        @p.Price.ToString("N2") р.
+                                        @if (p.OldPrice.HasValue)
+                                        {
+                                            <br /><s class="adm-old-price">@p.OldPrice.Value.ToString("N2")</s>
+                                        }
+                                    </td>
+                                    <td>@p.CategoryName</td>
+                                    <td>@p.BrandName</td>
+                                    <td>@(p.Sku ?? "—")</td>
+                                    <td>@FilterTypeName(p.FilterType)</td>
+                                    <td class="adm-actions-cell">
+                                        <button class="adm-btn-icon adm-btn-edit" title="Редактировать"
+                                                onclick="editProduct('@p.Id', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Name)', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Description ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(p.ShortDescription ?? "")', @p.Price, @(p.OldPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @p.FilterType, '@p.CategoryId', '@p.BrandId', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Sku ?? "")', @(p.Images?.Count > 0 ? "true" : "false"))">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg>
+                                        </button>
+                                        <form asp-controller="Admin" asp-action="DeleteProduct" method="post" class="adm-inline-form"
+                                              onsubmit="return confirm('Удалить товар «@System.Web.HttpUtility.JavaScriptStringEncode(p.Name)»?')">
+                                            <input type="hidden" name="productId" value="@p.Id" />
+                                            <button type="submit" class="adm-btn-icon adm-btn-delete" title="Удалить">
+                                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2"/></svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="8" class="adm-empty">Товары не найдены</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Products Pagination -->
+            @if (Model.ProductsTotalPages > 1)
+            {
+                <div class="adm-pagination">
+                    <span class="adm-pagination-info">
+                        Показано @products.Count из @(Model.Products?.TotalCount ?? 0) товаров (стр. @Model.ProductsPage из @Model.ProductsTotalPages)
+                    </span>
+                    <div class="adm-pagination-buttons">
+                        @if (Model.ProductsPage > 1)
+                        {
+                            <a href="/admin?tab=products&productsPage=1&ordersPage=@Model.OrdersPage" class="adm-btn adm-btn-ghost adm-btn-sm">&laquo;</a>
+                            <a href="/admin?tab=products&productsPage=@(Model.ProductsPage - 1)&ordersPage=@Model.OrdersPage" class="adm-btn adm-btn-ghost adm-btn-sm">&lsaquo; Назад</a>
+                        }
+                        @{
+                            int pStart = Math.Max(1, Model.ProductsPage - 2);
+                            int pEnd = Math.Min(Model.ProductsTotalPages, Model.ProductsPage + 2);
+                        }
+                        @for (int i = pStart; i <= pEnd; i++)
+                        {
+                            if (i == Model.ProductsPage)
+                            {
+                                <span class="adm-btn adm-btn-primary adm-btn-sm">@i</span>
+                            }
+                            else
+                            {
+                                <a href="/admin?tab=products&productsPage=@i&ordersPage=@Model.OrdersPage" class="adm-btn adm-btn-ghost adm-btn-sm">@i</a>
+                            }
+                        }
+                        @if (Model.ProductsPage < Model.ProductsTotalPages)
+                        {
+                            <a href="/admin?tab=products&productsPage=@(Model.ProductsPage + 1)&ordersPage=@Model.OrdersPage" class="adm-btn adm-btn-ghost adm-btn-sm">Вперёд &rsaquo;</a>
+                            <a href="/admin?tab=products&productsPage=@Model.ProductsTotalPages&ordersPage=@Model.OrdersPage" class="adm-btn adm-btn-ghost adm-btn-sm">&raquo;</a>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Edit Product Form (hidden) -->
+            <div id="productEditForm" class="adm-form-panel" style="display:none;">
+                <h3>Редактировать товар</h3>
+                <form asp-controller="Admin" asp-action="UpdateProduct" method="post">
+                    <input type="hidden" name="ProductId" id="editProductId" />
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="Name" id="editProductName" required />
+                        </div>
+                        <div>
+                            <label>Артикул (SKU)</label>
+                            <input type="text" name="Sku" id="editProductSku" />
+                        </div>
+                        <div class="span-2">
+                            <label>Описание *</label>
+                            <textarea name="Description" id="editProductDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="span-2">
+                            <label>Краткое описание</label>
+                            <textarea name="ShortDescription" id="editProductShortDesc" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label>Цена *</label>
+                            <input type="number" name="Price" id="editProductPrice" min="0" step="0.01" required />
+                        </div>
+                        <div>
+                            <label>Старая цена</label>
+                            <input type="number" name="OldPrice" id="editProductOldPrice" min="0" step="0.01" />
+                        </div>
+                        <div>
+                            <label>Тип фильтра</label>
+                            <select name="FilterType" id="editProductFilterType">
+                                @for (int i = 0; i <= 7; i++)
+                                {
+                                    <option value="@i">@FilterTypeName(i)</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Категория *</label>
+                            <select name="CategoryId" id="editProductCategoryId" required>
+                                @foreach (var item in flattenedCategories)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Бренд *</label>
+                            <select name="BrandId" id="editProductBrandId" required>
+                                @foreach (var brand in brands.OrderBy(b => b.Name))
+                                {
+                                    <option value="@brand.Id">@brand.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div>
+                            <label>Ресурс (мес.)</label>
+                            <input type="number" name="FilterLifespanMonths" id="editProductLifespan" min="0" />
+                        </div>
+                        <div>
+                            <label>Объем (л)</label>
+                            <input type="number" name="FilterCapacityLiters" id="editProductCapacity" min="0" />
+                        </div>
+                        <div>
+                            <label>Производительность (л/мин)</label>
+                            <input type="number" name="FlowRateLitersPerMinute" id="editProductFlowRate" min="0" step="0.01" />
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Сохранить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('productEditForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ═══════════ CATEGORIES TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "categories" ? "active" : "")" id="tab-categories">
+            <div class="adm-section-header">
+                <h1>Категории</h1>
+                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('categoryAddForm')">+ Добавить категорию</button>
+            </div>
+
+            <!-- Add Category Form -->
+            <div id="categoryAddForm" class="adm-form-panel" style="display:none;">
+                <h3>Новая категория</h3>
+                <form asp-controller="Admin" asp-action="CreateCategory" method="post">
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="Name" required />
+                        </div>
+                        <div>
+                            <label>Родительская категория</label>
+                            <select name="ParentCategoryId">
+                                <option value="">Без родителя</option>
+                                @foreach (var item in flattenedCategories)
+                                {
+                                    <option value="@item.Id">@item.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="span-2">
+                            <label>Описание</label>
+                            <textarea name="Description" rows="2"></textarea>
+                        </div>
+                        <div class="span-2">
+                            <label>Изображение (URL)</label>
+                            <input type="text" name="ImageUrl" placeholder="https://..." />
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Добавить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('categoryAddForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Родитель</th>
+                            <th>Подкатегории</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (allCategories.Any())
+                        {
+                            @foreach (var c in allCategories.OrderBy(x => x.Name))
+                            {
+                                var parentName = c.ParentCategoryId.HasValue
+                                    ? allCategories.FirstOrDefault(x => x.Id == c.ParentCategoryId.Value)?.Name ?? "—"
+                                    : "—";
+                                <tr>
+                                    <td><strong>@c.Name</strong></td>
+                                    <td class="adm-desc-cell">@(c.Description ?? "—")</td>
+                                    <td>@parentName</td>
+                                    <td>@c.SubCategories.Count</td>
+                                    <td class="adm-actions-cell">
+                                        <button class="adm-btn-icon adm-btn-edit" title="Редактировать"
+                                                onclick="editCategory('@c.Id', '@System.Web.HttpUtility.JavaScriptStringEncode(c.Name)', '@System.Web.HttpUtility.JavaScriptStringEncode(c.Description ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(c.ImageUrl ?? "")')">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg>
+                                        </button>
+                                        <form asp-controller="Admin" asp-action="DeleteCategory" method="post" class="adm-inline-form"
+                                              onsubmit="return confirm('Удалить категорию «@System.Web.HttpUtility.JavaScriptStringEncode(c.Name)»?')">
+                                            <input type="hidden" name="categoryId" value="@c.Id" />
+                                            <button type="submit" class="adm-btn-icon adm-btn-delete" title="Удалить">
+                                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2"/></svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="adm-empty">Категории не найдены</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Edit Category Form -->
+            <div id="categoryEditForm" class="adm-form-panel" style="display:none;">
+                <h3>Редактировать категорию</h3>
+                <form asp-controller="Admin" asp-action="UpdateCategory" method="post">
+                    <input type="hidden" name="categoryId" id="editCategoryId" />
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="name" id="editCategoryName" required />
+                        </div>
+                        <div>
+                            <label>Изображение (URL)</label>
+                            <input type="text" name="imageUrl" id="editCategoryImageUrl" />
+                        </div>
+                        <div class="span-2">
+                            <label>Описание</label>
+                            <textarea name="description" id="editCategoryDescription" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Сохранить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('categoryEditForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ═══════════ BRANDS TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "brands" ? "active" : "")" id="tab-brands">
+            <div class="adm-section-header">
+                <h1>Бренды</h1>
+                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('brandAddForm')">+ Добавить бренд</button>
+            </div>
+
+            <!-- Add Brand Form -->
+            <div id="brandAddForm" class="adm-form-panel" style="display:none;">
+                <h3>Новый бренд</h3>
+                <form asp-controller="Admin" asp-action="CreateBrand" method="post">
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="Name" required />
+                        </div>
+                        <div>
+                            <label>Страна</label>
+                            <input type="text" name="Country" />
+                        </div>
+                        <div class="span-2">
+                            <label>Описание</label>
+                            <textarea name="Description" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label>Логотип (URL)</label>
+                            <input type="text" name="LogoUrl" placeholder="https://..." />
+                        </div>
+                        <div>
+                            <label>Сайт (URL)</label>
+                            <input type="text" name="WebsiteUrl" placeholder="https://..." />
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Добавить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('brandAddForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Brands Table -->
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Описание</th>
+                            <th>Страна</th>
+                            <th>Сайт</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (brands.Any())
+                        {
+                            @foreach (var b in brands.OrderBy(x => x.Name))
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="adm-brand-cell">
+                                            @if (!string.IsNullOrEmpty(b.LogoUrl))
+                                            {
+                                                <img class="adm-brand-logo" src="@b.LogoUrl" alt="@b.Name" />
+                                            }
+                                            <strong>@b.Name</strong>
+                                        </div>
+                                    </td>
+                                    <td class="adm-desc-cell">@(b.Description ?? "—")</td>
+                                    <td>@(b.Country ?? "—")</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(b.WebsiteUrl))
+                                        {
+                                            <a href="@b.WebsiteUrl" target="_blank" class="adm-link">@b.WebsiteUrl</a>
+                                        }
+                                        else
+                                        {
+                                            <span>—</span>
+                                        }
+                                    </td>
+                                    <td class="adm-actions-cell">
+                                        <button class="adm-btn-icon adm-btn-edit" title="Редактировать"
+                                                onclick="editBrand('@b.Id', '@System.Web.HttpUtility.JavaScriptStringEncode(b.Name)', '@System.Web.HttpUtility.JavaScriptStringEncode(b.Description ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(b.Country ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(b.LogoUrl ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(b.WebsiteUrl ?? "")')">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg>
+                                        </button>
+                                        <form asp-controller="Admin" asp-action="DeleteBrand" method="post" class="adm-inline-form"
+                                              onsubmit="return confirm('Удалить бренд «@System.Web.HttpUtility.JavaScriptStringEncode(b.Name)»?')">
+                                            <input type="hidden" name="brandId" value="@b.Id" />
+                                            <button type="submit" class="adm-btn-icon adm-btn-delete" title="Удалить">
+                                                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="currentColor" stroke-width="2"/></svg>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="adm-empty">Бренды не найдены</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Edit Brand Form -->
+            <div id="brandEditForm" class="adm-form-panel" style="display:none;">
+                <h3>Редактировать бренд</h3>
+                <form asp-controller="Admin" asp-action="UpdateBrand" method="post">
+                    <input type="hidden" name="brandId" id="editBrandId" />
+                    <div class="adm-form-grid">
+                        <div>
+                            <label>Название *</label>
+                            <input type="text" name="name" id="editBrandName" required />
+                        </div>
+                        <div>
+                            <label>Страна</label>
+                            <input type="text" name="country" id="editBrandCountry" />
+                        </div>
+                        <div class="span-2">
+                            <label>Описание</label>
+                            <textarea name="description" id="editBrandDescription" rows="2"></textarea>
+                        </div>
+                        <div>
+                            <label>Логотип (URL)</label>
+                            <input type="text" name="logoUrl" id="editBrandLogoUrl" />
+                        </div>
+                        <div>
+                            <label>Сайт (URL)</label>
+                            <input type="text" name="websiteUrl" id="editBrandWebsiteUrl" />
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Сохранить</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('brandEditForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ═══════════ ORDERS TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "orders" ? "active" : "")" id="tab-orders">
+            <div class="adm-section-header">
+                <h1>Заказы</h1>
+                <a href="/admin/orders/export/csv"
+                   class="adm-btn adm-btn-secondary">
+                    Экспорт статистики (CSV)
+                </a>
+            </div>
+
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Номер заказа</th>
+                            <th>Пользователь</th>
+                            <th>Статус</th>
+                            <th>Товаров</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (orders.Any())
+                        {
+                            @foreach (var o in orders.OrderByDescending(x => x.CreatedAt))
+                            {
+                                <tr>
+                                    <td><strong>@o.OrderNumber</strong></td>
+                                    <td>
+                                        <div class="adm-user-cell">
+                                            <span class="adm-user-name">@o.UserName</span>
+                                            <span class="adm-user-email">@o.UserEmail</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="adm-status @StatusClass(o.Status)">@StatusName(o.Status)</span>
+                                    </td>
+                                    <td>@o.ItemCount</td>
+                                    <td class="adm-nowrap">@o.TotalAmount.ToString("N2") @o.Currency</td>
+                                    <td class="adm-nowrap">@o.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                                    <td class="adm-actions-cell">
+                                        <a href="/cart/receipt/@o.Id" class="adm-btn-icon adm-btn-view" title="Подробнее">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="7" class="adm-empty">Заказов нет</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Orders Pagination -->
+            @if (Model.OrdersTotalPages > 1)
+            {
+                <div class="adm-pagination">
+                    <span class="adm-pagination-info">
+                        Показано @orders.Count из @(Model.Orders?.TotalCount ?? 0) заказов (стр. @Model.OrdersPage из @Model.OrdersTotalPages)
+                    </span>
+                    <div class="adm-pagination-buttons">
+                        @if (Model.OrdersPage > 1)
+                        {
+                            <a href="/admin?tab=orders&ordersPage=1&productsPage=@Model.ProductsPage" class="adm-btn adm-btn-ghost adm-btn-sm">&laquo;</a>
+                            <a href="/admin?tab=orders&ordersPage=@(Model.OrdersPage - 1)&productsPage=@Model.ProductsPage" class="adm-btn adm-btn-ghost adm-btn-sm">&lsaquo; Назад</a>
+                        }
+                        @{
+                            int oStart = Math.Max(1, Model.OrdersPage - 2);
+                            int oEnd = Math.Min(Model.OrdersTotalPages, Model.OrdersPage + 2);
+                        }
+                        @for (int i = oStart; i <= oEnd; i++)
+                        {
+                            if (i == Model.OrdersPage)
+                            {
+                                <span class="adm-btn adm-btn-primary adm-btn-sm">@i</span>
+                            }
+                            else
+                            {
+                                <a href="/admin?tab=orders&ordersPage=@i&productsPage=@Model.ProductsPage" class="adm-btn adm-btn-ghost adm-btn-sm">@i</a>
+                            }
+                        }
+                        @if (Model.OrdersPage < Model.OrdersTotalPages)
+                        {
+                            <a href="/admin?tab=orders&ordersPage=@(Model.OrdersPage + 1)&productsPage=@Model.ProductsPage" class="adm-btn adm-btn-ghost adm-btn-sm">Вперёд &rsaquo;</a>
+                            <a href="/admin?tab=orders&ordersPage=@Model.OrdersTotalPages&productsPage=@Model.ProductsPage" class="adm-btn adm-btn-ghost adm-btn-sm">&raquo;</a>
+                        }
+                    </div>
+                </div>
+            }
+        </section>
+
+        <!-- ═══════════ USERS TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "users" ? "active" : "")" id="tab-users">
+            <div class="adm-section-header">
+                <h1>Пользователи</h1>
+            </div>
+
+            <div class="adm-table-wrap">
+                <table class="adm-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Имя</th>
+                            <th>Телефон</th>
+                            <th>Роль</th>
+                            <th>Активен</th>
+                            <th>Создан</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @if (Model.Users.Any())
+                    {
+                        foreach (var u in Model.Users.OrderByDescending(x => x.CreatedAt))
+                        {
+                            <tr>
+                                <td>@u.Email</td>
+                                <td>@($"{u.FirstName} {u.LastName}")</td>
+                                <td>@u.Phone</td>
+                                <td>@u.Role</td>
+                                <td>@(u.IsActive ? "Да" : "Нет")</td>
+                                <td class="adm-nowrap">@u.CreatedAt.ToString("dd.MM.yyyy")</td>
+                                <td class="adm-actions-cell">
+                                    <form asp-controller="Admin" asp-action="UpdateUser" method="post" class="adm-inline-form adm-user-actions">
+                                        <input type="hidden" name="Id" value="@u.Id" />
+                                        <input type="hidden" name="Email" value="@u.Email" />
+                                        <input type="hidden" name="FirstName" value="@u.FirstName" />
+                                        <input type="hidden" name="LastName" value="@u.LastName" />
+                                        <input type="hidden" name="Phone" value="@u.Phone" />
+                                        <select name="Role" class="adm-select-small">
+                                            @if (string.Equals(u.Role, "Customer", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                <option value="Customer" selected="selected">Покупатель</option>
+                                                <option value="Admin">Админ</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="Customer">Покупатель</option>
+                                                <option value="Admin" selected="selected">Админ</option>
+                                            }
+                                        </select>
+                                        <label class="adm-checkbox-inline">
+                                            <input type="checkbox" name="IsActive" value="true" @(u.IsActive ? "checked" : "") />
+                                            Активен
+                                        </label>
+                                        <button type="submit" class="adm-btn adm-btn-primary adm-btn-sm">Сохранить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr><td colspan="7" class="adm-empty">Пользователей нет</td></tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // ───── Tab switching ─────
+    document.querySelectorAll('.adm-nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            // update active nav
+            document.querySelectorAll('.adm-nav-item').forEach(n => n.classList.remove('active'));
+            btn.classList.add('active');
+            // update content
+            document.querySelectorAll('.adm-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab)?.classList.add('active');
+            // update URL without reload
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tab);
+            window.history.replaceState({}, '', url);
+        });
+    });
+
+    // ───── Toggle form visibility ─────
+    function toggleAdmForm(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const isVisible = el.style.display !== 'none';
+        el.style.display = isVisible ? 'none' : 'block';
+        if (!isVisible) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // ───── Edit Product ─────
+    function editProduct(id, name, desc, shortDesc, price, oldPrice, filterType, categoryId, brandId, sku) {
+        document.getElementById('editProductId').value = id;
+        document.getElementById('editProductName').value = name;
+        document.getElementById('editProductDescription').value = desc;
+        document.getElementById('editProductShortDesc').value = shortDesc;
+        document.getElementById('editProductPrice').value = price;
+        document.getElementById('editProductOldPrice').value = oldPrice || '';
+        document.getElementById('editProductFilterType').value = filterType;
+        document.getElementById('editProductCategoryId').value = categoryId;
+        document.getElementById('editProductBrandId').value = brandId;
+        document.getElementById('editProductSku').value = sku;
+        const form = document.getElementById('productEditForm');
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ───── Edit Category ─────
+    function editCategory(id, name, desc, imageUrl) {
+        document.getElementById('editCategoryId').value = id;
+        document.getElementById('editCategoryName').value = name;
+        document.getElementById('editCategoryDescription').value = desc;
+        document.getElementById('editCategoryImageUrl').value = imageUrl;
+        const form = document.getElementById('categoryEditForm');
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // ───── Edit Brand ─────
+    function editBrand(id, name, desc, country, logoUrl, websiteUrl) {
+        document.getElementById('editBrandId').value = id;
+        document.getElementById('editBrandName').value = name;
+        document.getElementById('editBrandDescription').value = desc;
+        document.getElementById('editBrandCountry').value = country;
+        document.getElementById('editBrandLogoUrl').value = logoUrl;
+        document.getElementById('editBrandWebsiteUrl').value = websiteUrl;
+        const form = document.getElementById('brandEditForm');
+        form.style.display = 'block';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+</script>

@@ -1,0 +1,13 @@
+# Dockerfile для создания образа MySQL с предзаполненными данными AquaStore
+# Использование: docker build -f Dockerfile.mysql-with-data -t ваш-логин/aquastore-mysql:latest .
+
+FROM mysql:8.0
+
+# Копируем дамп базы данных
+# MySQL автоматически выполнит все .sql файлы из /docker-entrypoint-initdb.d/ при первом запуске
+# Порядок выполнения: по алфавиту (00-*, 01-*, и т.д.)
+COPY scripts/aquastore-backup.sql /docker-entrypoint-initdb.d/01-aquastore-data.sql
+
+# Если есть init скрипт, он должен быть скопирован отдельно перед сборкой
+# или добавлен вручную в образ
+

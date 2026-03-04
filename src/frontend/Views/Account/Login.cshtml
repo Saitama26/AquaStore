@@ -1,0 +1,72 @@
+@model frontend.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Вход";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account.css" asp-append-version="true" />
+}
+
+<div class="account-wrapper">
+    <div class="account-ocean-bg" aria-hidden="true">
+        <span class="sun-ray sun-ray-1"></span>
+        <span class="sun-ray sun-ray-2"></span>
+        <span class="bubble bubble-1"></span>
+        <span class="bubble bubble-2"></span>
+        <span class="bubble bubble-3"></span>
+        <span class="bubble bubble-4"></span>
+        <span class="bubble bubble-5"></span>
+        <span class="bubble bubble-6"></span>
+        <span class="bubble bubble-7"></span>
+        <span class="bubble bubble-8"></span>
+    </div>
+    <div class="account-card">
+        <div class="account-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm0 2c-4.4 0-8 2-8 4.5V21h16v-2.5C20 16 16.4 14 12 14Z"></path>
+            </svg>
+        </div>
+        <h1>Вход в AquaStore</h1>
+        <p class="account-subtitle">Добро пожаловать обратно. Войдите, чтобы продолжить покупки.</p>
+
+        @if (ViewData["Success"] is string successMessage)
+        {
+            <div class="form-success">@successMessage</div>
+        }
+
+        <form asp-action="Login" asp-controller="Account" method="post" class="account-form">
+            <div asp-validation-summary="ModelOnly" class="form-error"></div>
+
+            <label asp-for="Email" class="field-label">Email</label>
+            <div class="input-with-icon">
+                <span class="input-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M4 6h16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm0 2 8 5 8-5"></path>
+                    </svg>
+                </span>
+                <input asp-for="Email" type="email" autocomplete="email" />
+            </div>
+            <span asp-validation-for="Email" class="field-error"></span>
+
+            <label asp-for="Password" class="field-label">Пароль</label>
+            <div class="input-with-icon">
+                <span class="input-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                        <path d="M7 11V8a5 5 0 0 1 10 0v3m-9 0h8a2 2 0 0 1 2 2v7H6v-7a2 2 0 0 1 2-2Z"></path>
+                    </svg>
+                </span>
+                <input asp-for="Password" type="password" autocomplete="current-password" />
+            </div>
+            <span asp-validation-for="Password" class="field-error"></span>
+
+            <button type="submit" class="submit-button">Войти</button>
+        </form>
+
+        <div class="account-footer">
+            Нет аккаунта?
+            <a href="/account/register">Зарегистрироваться</a>
+        </div>
+    </div>
+</div>
+

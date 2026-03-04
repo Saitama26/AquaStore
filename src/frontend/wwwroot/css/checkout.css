@@ -1,0 +1,146 @@
+.checkout-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 30px;
+  padding: 30px;
+  max-width: 1200px;
+  margin: 20px auto 40px;
+  color: #f7fbff;
+}
+
+.checkout-content {
+  background: rgba(10, 17, 40, 0.7);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.checkout-content h1 {
+  font-size: 26px;
+  color: #2f8cff;
+  margin-bottom: 20px;
+}
+
+.checkout-form .form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.checkout-form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkout-form .field.full {
+  grid-column: span 2;
+}
+
+.checkout-form input,
+.checkout-form textarea {
+  background: rgba(10, 17, 40, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f7fbff;
+}
+
+.checkout-form label {
+  font-size: 13px;
+  color: rgba(247, 251, 255, 0.7);
+}
+
+.field-error {
+  color: #ff8a8a;
+  font-size: 12px;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.checkout-submit {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #2f8cff;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.checkout-submit:hover {
+  background: #3fb4ff;
+}
+
+.checkout-cancel {
+  color: rgba(247, 251, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.form-summary {
+  margin-top: 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.checkout-summary {
+  background: rgba(10, 17, 40, 0.8);
+  border-radius: 16px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  height: fit-content;
+}
+
+.checkout-summary h2 {
+  margin-bottom: 15px;
+  color: #3fb4ff;
+  font-size: 20px;
+}
+
+.summary-items {
+  display: grid;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summary-total {
+  margin-top: 16px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+}
+
+@media (max-width: 900px) {
+  .checkout-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .checkout-page {
+    padding: 20px;
+  }
+
+  .checkout-form .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-form .field.full {
+    grid-column: span 1;
+  }
+}
+

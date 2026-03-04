@@ -1,0 +1,94 @@
+@model frontend.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Оформление заказа";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+}
+
+<div class="checkout-page">
+    <div class="checkout-content">
+        <h1>Оформление заказа</h1>
+
+        <form asp-action="Checkout" asp-controller="Cart" method="post" class="checkout-form">
+            @Html.AntiForgeryToken()
+            @for (var i = 0; i < Model.Order.SelectedProductIds.Count; i++)
+            {
+                <input type="hidden" name="Order.SelectedProductIds[@i]" value="@Model.Order.SelectedProductIds[i]" />
+            }
+            <input type="hidden" asp-for="Order.BuyNowSingleUnit" />
+            <div class="form-grid">
+                <div class="field">
+                    <label asp-for="Order.City">Город</label>
+                    <input asp-for="Order.City" />
+                    <span asp-validation-for="Order.City" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.Street">Улица</label>
+                    <input asp-for="Order.Street" />
+                    <span asp-validation-for="Order.Street" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.Building">Дом</label>
+                    <input asp-for="Order.Building" />
+                    <span asp-validation-for="Order.Building" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.Apartment">Квартира</label>
+                    <input asp-for="Order.Apartment" />
+                    <span asp-validation-for="Order.Apartment" class="field-error"></span>
+                </div>
+                <div class="field">
+                    <label asp-for="Order.PostalCode">Индекс</label>
+                    <input asp-for="Order.PostalCode" />
+                    <span asp-validation-for="Order.PostalCode" class="field-error"></span>
+                </div>
+                <div class="field full">
+                    <label asp-for="Order.CustomerNote">Комментарий к заказу</label>
+                    <textarea asp-for="Order.CustomerNote" rows="3"></textarea>
+                    <span asp-validation-for="Order.CustomerNote" class="field-error"></span>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="checkout-submit">Подтвердить заказ</button>
+                <a class="checkout-cancel" href="/cart">Вернуться в корзину</a>
+            </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="form-summary">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <div class="field-error">@error.ErrorMessage</div>
+                    }
+                </div>
+            }
+        </form>
+    </div>
+
+    <aside class="checkout-summary">
+        <h2>Ваш заказ</h2>
+        <div class="summary-items">
+            @foreach (var item in Model.Cart.Items)
+            {
+                <div class="summary-item">
+                    <span>@item.ProductName</span>
+                    <span>@item.Quantity × @item.UnitPrice.ToString("N2") @Model.Cart.Currency</span>
+                </div>
+            }
+        </div>
+        <div class="summary-total">
+            <span>Итого</span>
+            <span>@Model.Cart.TotalAmount.ToString("N2") @Model.Cart.Currency</span>
+        </div>
+    </aside>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

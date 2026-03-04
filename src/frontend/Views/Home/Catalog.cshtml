@@ -1,0 +1,400 @@
+@model PagedResponse<ProductViewModel>
+
+@{
+    ViewData["Title"] = "AquaStore — Каталог";
+    ViewData["HideCatalogLink"] = true;
+
+    var categoryId = ViewData["CategoryId"] as Guid?;
+    var brandId = ViewData["BrandId"] as Guid?;
+    var searchTerm = ViewData["SearchTerm"] as string;
+    var filterType = ViewData["FilterType"] as int?;
+    var minPrice = ViewData["MinPrice"] as decimal?;
+    var maxPrice = ViewData["MaxPrice"] as decimal?;
+    var inStock = ViewData["InStock"] as bool?;
+    var sortBy = ViewData["SortBy"] as string;
+    var sortDescending = ViewData["SortDescending"] as bool? ?? false;
+
+    var categories = ViewData["Categories"] as IReadOnlyList<CategoryViewModel> ?? Array.Empty<CategoryViewModel>();
+    var brands = ViewData["Brands"] as IReadOnlyList<BrandViewModel> ?? Array.Empty<BrandViewModel>();
+
+    // Flatten categories for dropdown
+    var flatCats = new List<(Guid Id, string Name)>();
+    void AddCat(CategoryViewModel cat, string prefix)
+    {
+        flatCats.Add((cat.Id, $"{prefix}{cat.Name}"));
+        foreach (var sub in cat.SubCategories.OrderBy(c => c.Name))
+            AddCat(sub, $"{prefix}— ");
+    }
+    foreach (var c in categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name))
+        AddCat(c, "");
+
+    // Helper to build query preserving all current filters
+    string BuildQuery(
+        int page = 1,
+        string? overrideSortBy = null,
+        bool? overrideSortDesc = null,
+        Guid? overrideCategoryId = null,
+        Guid? overrideBrandId = null,
+        int? overrideFilterType = null,
+        bool clearCategory = false,
+        bool clearBrand = false,
+        bool clearFilterType = false)
+    {
+        var qs = new List<string>();
+        if (page > 1) qs.Add($"pageNumber={page}");
+        if (!string.IsNullOrWhiteSpace(searchTerm)) qs.Add($"searchTerm={Uri.EscapeDataString(searchTerm)}");
+        
+        var catVal = clearCategory ? null : (overrideCategoryId ?? categoryId);
+        if (catVal.HasValue) qs.Add($"categoryId={catVal}");
+        
+        var brVal = clearBrand ? null : (overrideBrandId ?? brandId);
+        if (brVal.HasValue) qs.Add($"brandId={brVal}");
+        
+        var ftVal = clearFilterType ? null : (overrideFilterType ?? filterType);
+        if (ftVal.HasValue) qs.Add($"filterType={ftVal}");
+        
+        if (minPrice.HasValue) qs.Add($"minPrice={minPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (maxPrice.HasValue) qs.Add($"maxPrice={maxPrice.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        if (inStock == true) qs.Add("inStock=true");
+        
+        var sb = overrideSortBy ?? sortBy;
+        var sd = overrideSortDesc ?? sortDescending;
+        if (!string.IsNullOrWhiteSpace(sb))
+        {
+            qs.Add($"sortBy={sb}");
+            if (sd) qs.Add("sortDescending=true");
+        }
+        
+        return qs.Count > 0 ? "?" + string.Join("&", qs) : "";
+    }
+
+    bool hasActiveFilters = categoryId.HasValue || brandId.HasValue || filterType.HasValue
+        || minPrice.HasValue || maxPrice.HasValue || inStock == true;
+
+    string FilterTypeName(int ft) => ft switch
+    {
+        0 => "Кувшин",
+        1 => "Под мойку",
+        2 => "Обратный осмос",
+        3 => "Магистральный",
+        4 => "Насадка на кран",
+        5 => "Картридж",
+        6 => "Душ",
+        7 => "Умягчитель",
+        _ => "—"
+    };
+
+    // Determine current context title
+    string contextTitle = "Каталог товаров";
+    if (!string.IsNullOrWhiteSpace(searchTerm))
+    {
+        contextTitle = $"Результаты поиска «{searchTerm}»";
+    }
+    else if (categoryId.HasValue)
+    {
+        var catName = flatCats.FirstOrDefault(c => c.Id == categoryId.Value).Name;
+        if (!string.IsNullOrEmpty(catName)) contextTitle = catName;
+    }
+    else if (brandId.HasValue)
+    {
+        var brName = brands.FirstOrDefault(b => b.Id == brandId.Value)?.Name;
+        if (!string.IsNullOrEmpty(brName)) contextTitle = brName;
+    }
+    else if (filterType.HasValue)
+    {
+        contextTitle = "Фильтры: " + FilterTypeName(filterType.Value);
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/catalog-filters.css" asp-append-version="true" />
+}
+
+<!-- ═══════ CATALOG HERO ═══════ -->
+<div class="cat-hero">
+    <div class="cat-hero-content">
+        <nav class="cat-breadcrumbs">
+            <a href="/">Главная</a>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span>Каталог</span>
+        </nav>
+        <h1 class="cat-hero-title">@contextTitle</h1>
+        @if (Model?.TotalCount > 0)
+        {
+            <p class="cat-hero-count">@Model.TotalCount товаров</p>
+        }
+    </div>
+</div>
+
+<!-- ═══════ CATALOG BODY ═══════ -->
+<div class="cat-body">
+
+    <!-- ═══════ SORT + FILTER BAR ═══════ -->
+    <div class="catalog-toolbar">
+        <div class="catalog-sort">
+            <span class="catalog-sort-label">Сортировка:</span>
+            <div class="catalog-sort-options">
+                <a href="/catalog@(BuildQuery(overrideSortBy: "", overrideSortDesc: false))"
+                   class="sort-chip @(string.IsNullOrEmpty(sortBy) ? "active" : "")">По умолчанию</a>
+                <a href="/catalog@(BuildQuery(overrideSortBy: "price", overrideSortDesc: false))"
+                   class="sort-chip @(sortBy == "price" && !sortDescending ? "active" : "")">Сначала дешёвые</a>
+                <a href="/catalog@(BuildQuery(overrideSortBy: "price", overrideSortDesc: true))"
+                   class="sort-chip @(sortBy == "price" && sortDescending ? "active" : "")">Сначала дорогие</a>
+                <a href="/catalog@(BuildQuery(overrideSortBy: "created", overrideSortDesc: true))"
+                   class="sort-chip @(sortBy == "created" && sortDescending ? "active" : "")">Новинки</a>
+                <a href="/catalog@(BuildQuery(overrideSortBy: "name", overrideSortDesc: false))"
+                   class="sort-chip @(sortBy == "name" && !sortDescending ? "active" : "")">По названию</a>
+            </div>
+        </div>
+
+        <button class="catalog-filter-toggle" id="filterToggleBtn" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/>
+                <circle cx="8" cy="6" r="2" fill="currentColor"/><circle cx="16" cy="12" r="2" fill="currentColor"/><circle cx="10" cy="18" r="2" fill="currentColor"/>
+            </svg>
+            Фильтры
+            @if (hasActiveFilters)
+            {
+                <span class="filter-badge-active"></span>
+            }
+        </button>
+    </div>
+
+    <!-- ═══════ FILTERS PANEL ═══════ -->
+    <div class="catalog-filters-panel @(hasActiveFilters ? "open" : "")" id="filtersPanel">
+        <form method="get" action="/catalog" class="catalog-filters-form" id="filtersForm">
+            @if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <input type="hidden" name="searchTerm" value="@searchTerm" />
+            }
+            @if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                <input type="hidden" name="sortBy" value="@sortBy" />
+                @if (sortDescending)
+                {
+                    <input type="hidden" name="sortDescending" value="true" />
+                }
+            }
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                    Категория
+                </label>
+                <select name="categoryId" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                    <option value="">Все категории</option>
+                    @foreach (var (id, name) in flatCats)
+                    {
+                        if (categoryId == id)
+                        {
+                            <option value="@id" selected="selected">@name</option>
+                        }
+                        else
+                        {
+                            <option value="@id">@name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" stroke-linecap="round"/></svg>
+                    Бренд
+                </label>
+                <select name="brandId" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                    <option value="">Все бренды</option>
+                    @foreach (var b in brands.OrderBy(x => x.Name))
+                    {
+                        if (brandId == b.Id)
+                        {
+                            <option value="@b.Id" selected="selected">@b.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@b.Id">@b.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Тип фильтра
+                </label>
+                <select name="filterType" class="filter-select" onchange="document.getElementById('filtersForm').submit()">
+                    <option value="">Все типы</option>
+                    @for (int i = 0; i <= 7; i++)
+                    {
+                        if (filterType == i)
+                        {
+                            <option value="@i" selected="selected">@FilterTypeName(i)</option>
+                        }
+                        else
+                        {
+                            <option value="@i">@FilterTypeName(i)</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group filter-group-price">
+                <label class="filter-label">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    Цена (BYN)
+                </label>
+                <div class="filter-price-inputs">
+                    <input type="number" name="minPrice" placeholder="от" min="0" step="0.01"
+                           value="@(minPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture))"
+                           class="filter-input filter-price-input" />
+                    <span class="filter-price-dash">—</span>
+                    <input type="number" name="maxPrice" placeholder="до" min="0" step="0.01"
+                           value="@(maxPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture))"
+                           class="filter-input filter-price-input" />
+                </div>
+            </div>
+
+            <div class="filter-group filter-group-stock">
+                <label class="filter-checkbox-label">
+                    <input type="checkbox" name="inStock" value="true" @(inStock == true ? "checked" : "")
+                           onchange="document.getElementById('filtersForm').submit()" />
+                    <span class="filter-checkbox-custom"></span>
+                    Только в наличии
+                </label>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="filter-apply-btn">Применить</button>
+                @if (hasActiveFilters)
+                {
+                    <a href="/catalog@(string.IsNullOrWhiteSpace(searchTerm) && string.IsNullOrWhiteSpace(sortBy) ? "" : BuildQuery(overrideSortBy: sortBy, overrideSortDesc: sortDescending, clearCategory: true, clearBrand: true, clearFilterType: true))" class="filter-reset-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        Сбросить фильтры
+                    </a>
+                }
+            </div>
+        </form>
+
+        <!-- Active filter tags -->
+        @if (hasActiveFilters)
+        {
+            <div class="filter-tags">
+                @if (categoryId.HasValue)
+                {
+                    var catName = flatCats.FirstOrDefault(c => c.Id == categoryId.Value).Name ?? "Категория";
+                    <a href="/catalog@(BuildQuery(clearCategory: true))" class="filter-tag">
+                        @catName
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </a>
+                }
+                @if (brandId.HasValue)
+                {
+                    var brName = brands.FirstOrDefault(b => b.Id == brandId.Value)?.Name ?? "Бренд";
+                    <a href="/catalog@(BuildQuery(clearBrand: true))" class="filter-tag">
+                        @brName
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </a>
+                }
+                @if (filterType.HasValue)
+                {
+                    <a href="/catalog@(BuildQuery(clearFilterType: true))" class="filter-tag">
+                        @FilterTypeName(filterType.Value)
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </a>
+                }
+                @if (inStock == true)
+                {
+                    <span class="filter-tag filter-tag-info">В наличии</span>
+                }
+                @if (minPrice.HasValue || maxPrice.HasValue)
+                {
+                    var priceText = (minPrice.HasValue, maxPrice.HasValue) switch
+                    {
+                        (true, true) => $"{minPrice} – {maxPrice} BYN",
+                        (true, false) => $"от {minPrice} BYN",
+                        (false, true) => $"до {maxPrice} BYN",
+                        _ => ""
+                    };
+                    <span class="filter-tag filter-tag-info">@priceText</span>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- ═══════ PRODUCTS GRID ═══════ -->
+    <div id="productsContainer"
+         data-page="@(Model?.PageNumber ?? 1)"
+         data-total-pages="@(Model?.TotalPages ?? 1)">
+        @if (Model != null && Model.Items.Count > 0)
+        {
+            @Html.CreateCards(Model.Items);
+        }
+        else
+        {
+            <div class="no-products">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <p>Нет товаров по вашему запросу</p>
+                @if (hasActiveFilters)
+                {
+                    <a href="/catalog" class="no-products-reset">Сбросить фильтры</a>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- ═══════ PAGINATION ═══════ -->
+    @if (Model != null && Model.TotalPages > 1)
+    {
+        <nav class="pagination" id="pagination">
+            <a class="page-link @(Model.HasPreviousPage ? "" : "disabled")"
+               href="@(Model.HasPreviousPage ? "/catalog" + BuildQuery(page: Model.PageNumber - 1) : "#")">
+                &lsaquo; Назад
+            </a>
+
+            @{
+                int start = Math.Max(1, Model.PageNumber - 3);
+                int end = Math.Min(Model.TotalPages, Model.PageNumber + 3);
+            }
+            @if (start > 1)
+            {
+                <a class="page-link" href="/catalog@(BuildQuery(page: 1))">1</a>
+                @if (start > 2)
+                {
+                    <span class="page-dots">…</span>
+                }
+            }
+            @for (var i = start; i <= end; i++)
+            {
+                <a class="page-link @(i == Model.PageNumber ? "active" : "")"
+                   href="/catalog@(BuildQuery(page: i))">
+                    @i
+                </a>
+            }
+            @if (end < Model.TotalPages)
+            {
+                @if (end < Model.TotalPages - 1)
+                {
+                    <span class="page-dots">…</span>
+                }
+                <a class="page-link" href="/catalog@(BuildQuery(page: Model.TotalPages))">@Model.TotalPages</a>
+            }
+
+            <a class="page-link @(Model.HasNextPage ? "" : "disabled")"
+               href="@(Model.HasNextPage ? "/catalog" + BuildQuery(page: Model.PageNumber + 1) : "#")">
+                Вперёд &rsaquo;
+            </a>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+<script>
+    // Toggle filters panel
+    document.getElementById('filterToggleBtn')?.addEventListener('click', () => {
+        document.getElementById('filtersPanel')?.classList.toggle('open');
+    });
+</script>
+}

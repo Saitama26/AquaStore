@@ -1,0 +1,278 @@
+@model frontend.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Профиль";
+    Layout = "_Layout";
+
+    string GetStatusText(int status) => status switch
+    {
+        0 => "Ожидает",
+        1 => "Подтверждён",
+        2 => "В обработке",
+        3 => "Отправлен",
+        4 => "Доставлен",
+        5 => "Отменён",
+        _ => "—"
+    };
+
+    string GetStatusClass(int status) => status switch
+    {
+        0 => "status-pending",
+        1 => "status-confirmed",
+        2 => "status-processing",
+        3 => "status-shipped",
+        4 => "status-delivered",
+        5 => "status-cancelled",
+        _ => ""
+    };
+
+    var displayName = $"{Model.FirstName} {Model.LastName}".Trim();
+    if (string.IsNullOrWhiteSpace(displayName))
+    {
+        displayName = User?.Identity?.Name ?? "Пользователь";
+    }
+
+    var initials = "";
+    if (!string.IsNullOrWhiteSpace(Model.FirstName))
+    {
+        initials += Model.FirstName[0];
+    }
+    if (!string.IsNullOrWhiteSpace(Model.LastName))
+    {
+        initials += Model.LastName[0];
+    }
+    if (string.IsNullOrEmpty(initials))
+    {
+        initials = displayName.Length > 0 ? displayName[0].ToString().ToUpper() : "U";
+    }
+
+    var totalOrders = Model.Orders?.Items?.Count ?? 0;
+    var totalSpent = Model.Orders?.Items?.Sum(o => o.TotalAmount) ?? 0;
+    var memberSince = Model.CreatedAt != DateTime.MinValue
+        ? Model.CreatedAt.ToLocalTime().ToString("MMMM yyyy")
+        : "—";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/profile.css" asp-append-version="true" />
+}
+
+<div class="profile-page">
+    <!-- PROFILE HEADER -->
+    <div class="profile-header-card">
+        <div class="profile-header-bg"></div>
+        <div class="profile-header-content">
+            <div class="profile-avatar-large" id="profileAvatar">
+                <span class="profile-avatar-initials">@initials</span>
+            </div>
+            <div class="profile-header-info">
+                <h1 class="profile-display-name">@displayName</h1>
+                <p class="profile-email">@Model.Email</p>
+                <div class="profile-meta">
+                    @if (!string.IsNullOrEmpty(Model.Phone))
+                    {
+                        <span class="profile-meta-item">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                            @Model.Phone
+                        </span>
+                    }
+                    <span class="profile-meta-item">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        С нами с @memberSince
+                    </span>
+                </div>
+            </div>
+            <div class="profile-header-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-value">@totalOrders</span>
+                    <span class="profile-stat-label">заказов</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-value">@totalSpent.ToString("N0")</span>
+                    <span class="profile-stat-label">потрачено, р.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS NAVIGATION -->
+    <div class="profile-tabs">
+        <button class="profile-tab active" data-tab="orders">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            Заказы
+        </button>
+        <button class="profile-tab" data-tab="settings">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Настройки
+        </button>
+        @if (User?.IsInRole("Admin") == true)
+        {
+            <a class="profile-tab profile-tab-admin" href="/admin">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Админ панель
+            </a>
+        }
+    </div>
+
+    <!-- TAB: ORDERS -->
+    <div class="profile-tab-content active" id="tab-orders">
+        @if (totalOrders == 0)
+        {
+            <div class="profile-empty-state">
+                <div class="profile-empty-icon">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                </div>
+                <h3>У вас пока нет заказов</h3>
+                <p>Перейдите в каталог, чтобы выбрать товары</p>
+                <a href="/catalog" class="profile-action-btn">Перейти в каталог</a>
+            </div>
+        }
+        else
+        {
+            <div class="orders-list">
+                @foreach (var order in Model.Orders?.Items ?? new List<OrderListItemViewModel>())
+                {
+                    <div class="order-card">
+                        <div class="order-card-header">
+                            <div class="order-number-group">
+                                <span class="order-number">Заказ @order.OrderNumber</span>
+                                <span class="order-date">@order.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy в HH:mm")</span>
+                            </div>
+                            <span class="order-status @GetStatusClass(order.Status)">@GetStatusText(order.Status)</span>
+                        </div>
+                        <div class="order-card-body">
+                            <div class="order-info-row">
+                                <span class="order-info-label">Сумма</span>
+                                <span class="order-info-value order-total">@order.TotalAmount.ToString("N2") @order.Currency</span>
+                            </div>
+                            <div class="order-info-row">
+                                <span class="order-info-label">Товаров</span>
+                                <span class="order-info-value">@order.ItemCount шт.</span>
+                            </div>
+                        </div>
+                        <div class="order-card-footer">
+                            <a href="/cart/receipt/@order.Id" class="order-receipt-link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                                Квитанция
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- TAB: SETTINGS -->
+    <div class="profile-tab-content" id="tab-settings">
+        <div class="settings-grid">
+            <!-- Personal Info -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <h3>Личные данные</h3>
+                </div>
+                <form asp-action="UpdateProfile" asp-controller="Account" method="post" class="settings-form">
+                    <div class="settings-form-group">
+                        <label for="firstName">Имя</label>
+                        <input type="text" id="firstName" name="firstName" value="@Model.FirstName"
+                               placeholder="Введите имя" required minlength="2" maxlength="50" />
+                    </div>
+                    <div class="settings-form-group">
+                        <label for="lastName">Фамилия</label>
+                        <input type="text" id="lastName" name="lastName" value="@Model.LastName"
+                               placeholder="Введите фамилию" required minlength="2" maxlength="50" />
+                    </div>
+                    <div class="settings-form-group">
+                        <label for="phone">Телефон</label>
+                        <input type="tel" id="phone" name="phone" value="@Model.Phone"
+                               placeholder="+375 (XX) XXX-XX-XX" />
+                    </div>
+                    <div class="settings-form-actions">
+                        <button type="submit" class="settings-save-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                            Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Info (read only) -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                    <h3>Аккаунт</h3>
+                </div>
+                <div class="settings-info-list">
+                    <div class="settings-info-item">
+                        <span class="settings-info-label">Email</span>
+                        <span class="settings-info-value">@Model.Email</span>
+                    </div>
+                    <div class="settings-info-item">
+                        <span class="settings-info-label">Роль</span>
+                        <span class="settings-info-value">@(Model.Role == "Admin" ? "Администратор" : "Покупатель")</span>
+                    </div>
+                    @if (Model.CreatedAt != DateTime.MinValue)
+                    {
+                        <div class="settings-info-item">
+                            <span class="settings-info-label">Дата регистрации</span>
+                            <span class="settings-info-value">@Model.CreatedAt.ToLocalTime().ToString("dd MMMM yyyy")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Logout section -->
+        <div class="settings-danger-zone">
+            <form asp-action="Logout" asp-controller="Account" method="post">
+                <button type="submit" class="settings-logout-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Выйти из аккаунта
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tabs = document.querySelectorAll('.profile-tab[data-tab]');
+            const contents = document.querySelectorAll('.profile-tab-content');
+
+            // Check URL hash for initial tab
+            const hash = window.location.hash.replace('#', '');
+            if (hash) {
+                const targetTab = document.querySelector(`.profile-tab[data-tab="${hash}"]`);
+                if (targetTab) {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    targetTab.classList.add('active');
+                    document.getElementById('tab-' + hash)?.classList.add('active');
+                }
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    const target = this.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => {
+                        c.classList.remove('active');
+                        c.style.animation = 'none';
+                    });
+
+                    this.classList.add('active');
+                    const content = document.getElementById('tab-' + target);
+                    if (content) {
+                        content.classList.add('active');
+                        content.style.animation = 'none';
+                        content.offsetHeight; // trigger reflow
+                        content.style.animation = 'fadeSlideUp 0.35s ease forwards';
+                    }
+
+                    window.history.replaceState(null, '', '#' + target);
+                });
+            });
+        });
+    </script>
+}

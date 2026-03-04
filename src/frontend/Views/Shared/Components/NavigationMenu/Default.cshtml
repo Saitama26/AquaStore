@@ -1,0 +1,74 @@
+@model frontend.ViewModels.NavigationMenuViewModel
+
+@{
+    var rootCategories = Model.Categories
+        .Where(c => c.ParentCategoryId == null)
+        .OrderBy(c => c.Name)
+        .ToList();
+    var brands = Model.Brands.OrderBy(b => b.Name).ToList();
+}
+
+<div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+<aside class="nav-drawer" id="navDrawer" aria-hidden="true">
+    <div class="nav-drawer-header">
+        <span class="nav-drawer-title">Каталог</span>
+        <button type="button" class="nav-drawer-close" aria-label="Закрыть меню">×</button>
+    </div>
+    <div class="nav-drawer-content">
+        <div class="nav-section">
+            <div class="nav-section-title">Категории</div>
+            @if (rootCategories.Count == 0)
+            {
+                <div class="nav-empty">Категории не найдены</div>
+            }
+            else
+            {
+                <ul class="nav-list">
+                    @foreach (var category in rootCategories)
+                    {
+                        <li>
+                            <a href="@Url.Action("Catalog", "Home", new { categoryId = category.Id })">
+                                @category.Name
+                            </a>
+                            @if (category.SubCategories != null && category.SubCategories.Count > 0)
+                            {
+                                <ul class="nav-sublist">
+                                    @foreach (var sub in category.SubCategories.OrderBy(c => c.Name))
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Catalog", "Home", new { categoryId = sub.Id })">
+                                                @sub.Name
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Бренды</div>
+            @if (brands.Count == 0)
+            {
+                <div class="nav-empty">Бренды не найдены</div>
+            }
+            else
+            {
+                <ul class="nav-list nav-list-compact">
+                    @foreach (var brand in brands)
+                    {
+                        <li>
+                            <a href="@Url.Action("Catalog", "Home", new { brandId = brand.Id })">
+                                @brand.Name
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</aside>
+

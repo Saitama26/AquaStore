@@ -1,0 +1,15 @@
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\bin\Debug\net10.0\Common.Application.deps.json
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\bin\Debug\net10.0\Common.Application.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\bin\Debug\net10.0\Common.Application.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\bin\Debug\net10.0\Common.Domain.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\bin\Debug\net10.0\Common.Domain.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.csproj.AssemblyReference.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.AssemblyInfoInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.AssemblyInfo.cs
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.csproj.CoreCompileInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.A.58782CAF.Up2Date
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\refint\Common.Application.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\Common.Application.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Application\obj\Debug\net10.0\ref\Common.Application.dll

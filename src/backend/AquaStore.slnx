@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/Common/">
+    <Project Path="Common/Common.Application/Common.Application.csproj" />
+    <Project Path="Common/Common.Domain/Common.Domain.csproj" />
+    <Project Path="Common/Common.Infrastructure/Common.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="AquaStore.Api/AquaStore.Api.csproj" />
+  <Project Path="AquaStore.Application/AquaStore.Application.csproj" />
+  <Project Path="AquaStore.Contracts/AquaStore.Contracts.csproj" />
+  <Project Path="AquaStore.Domain/AquaStore.Domain.csproj" />
+  <Project Path="AquaStore.Infrastructure/AquaStore.Infrastructure.csproj" />
+</Solution>

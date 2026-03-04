@@ -1,0 +1,188 @@
+@model frontend.ViewModels.CartViewModel
+@{
+    ViewData["Title"] = "Корзина";
+    Layout = "_Layout";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cart.css" asp-append-version="true" />
+}
+
+<div class="cart-page">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h1>Корзина</h1>
+            <span class="cart-count">@Model.TotalItems товар(ов)</span>
+        </div>
+
+        <div class="cart-list">
+            @if (Model.Items.Count == 0)
+            {
+                <div class="cart-empty">
+                    <p>Корзина пока пуста.</p>
+                    <a href="/catalog" class="cart-empty-link">Перейти к покупкам</a>
+                </div>
+            }
+            else
+            {
+                <div class="cart-select-all">
+                    <label>
+                        <input type="checkbox" id="selectAllCartItems" checked />
+                        Выбрать все товары
+                    </label>
+                </div>
+                foreach (var item in Model.Items)
+                {
+                    <div class="cart-item"
+                         data-product-id="@item.ProductId"
+                         data-quantity="@item.Quantity"
+                         data-total-price="@item.TotalPrice">
+                        <div class="cart-item-select">
+                            <input type="checkbox" class="cart-item-checkbox" value="@item.ProductId" checked aria-label="Выбрать товар @item.ProductName" />
+                        </div>
+                        <div class="cart-item-image">
+                            <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? Url.Content("~/images/water-filter.svg") : item.ProductImageUrl)" alt="@item.ProductName" />
+                        </div>
+                        <div class="cart-item-info">
+                            <a class="cart-item-title" href="/products/@item.ProductSlug">@item.ProductName</a>
+                            <div class="cart-item-subtitle">Артикул: @item.ProductId</div>
+                        </div>
+                        <div class="cart-item-qty">
+                            <span class="qty-value">@item.Quantity</span>
+                        </div>
+                        <div class="cart-item-price">
+                            <span class="current-price">@item.TotalPrice.ToString("N2") @Model.Currency</span>
+                            <span class="unit-price">@item.UnitPrice.ToString("N2") @Model.Currency за шт.</span>
+                        </div>
+                        <button class="cart-item-remove" type="button" data-product-id="@item.ProductId" aria-label="Удалить">
+                            ✕
+                        </button>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <aside class="cart-summary">
+        <h2>Итого</h2>
+        <div class="summary-row">
+            <span id="selected-items-label">Товары, @Model.TotalItems шт.</span>
+            <span id="selected-items-amount" data-currency="@Model.Currency">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+        </div>
+        <div class="summary-row total">
+            <span>Итого</span>
+            <span id="selected-total-amount" data-currency="@Model.Currency">@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+        </div>
+        @if (Model.Items.Count > 0)
+        {
+            <button class="checkout-button" id="checkoutSelectedButton" type="button">Оформить выбранное</button>
+        }
+        else
+        {
+            <button class="checkout-button" type="button" disabled>Оформить заказ</button>
+        }
+        <label class="summary-agreement">
+            <input type="checkbox" />
+            Соглашаюсь с правилами использования
+        </label>
+    </aside>
+</div>
+
+@section Scripts {
+    <script>
+        const buildCheckoutUrl = () => {
+            const selected = Array.from(document.querySelectorAll(".cart-item-checkbox:checked"))
+                .map((checkbox) => checkbox.value)
+                .filter((value) => !!value);
+
+            if (selected.length === 0) {
+                showNotification("Выберите хотя бы один товар.", "info");
+                return null;
+            }
+
+            const params = new URLSearchParams();
+            selected.forEach((id) => params.append("productIds", id));
+            return `/Cart/Checkout?${params.toString()}`;
+        };
+
+        const selectAll = document.getElementById("selectAllCartItems");
+        const itemCheckboxes = document.querySelectorAll(".cart-item-checkbox");
+        const checkoutButton = document.getElementById("checkoutSelectedButton");
+        const selectedItemsLabel = document.getElementById("selected-items-label");
+        const selectedItemsAmount = document.getElementById("selected-items-amount");
+        const selectedTotalAmount = document.getElementById("selected-total-amount");
+
+        const updateSelectedSummary = () => {
+            if (!selectedItemsLabel || !selectedItemsAmount || !selectedTotalAmount) {
+                return;
+            }
+
+            let itemsCount = 0;
+            let amount = 0;
+
+            itemCheckboxes.forEach((checkbox) => {
+                if (!checkbox.checked) {
+                    return;
+                }
+
+                const cartItem = checkbox.closest(".cart-item");
+                if (!cartItem) {
+                    return;
+                }
+
+                itemsCount += parseInt(cartItem.dataset.quantity || "0", 10);
+                amount += parseFloat(cartItem.dataset.totalPrice || "0");
+            });
+
+            const currency = selectedItemsAmount.dataset.currency || "";
+            const formattedAmount = `${amount.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`.trim();
+
+            selectedItemsLabel.textContent = `Товары, ${itemsCount} шт.`;
+            selectedItemsAmount.textContent = formattedAmount;
+            selectedTotalAmount.textContent = formattedAmount;
+        };
+
+        if (selectAll && itemCheckboxes.length > 0) {
+            selectAll.addEventListener("change", () => {
+                itemCheckboxes.forEach((checkbox) => {
+                    checkbox.checked = selectAll.checked;
+                });
+                updateSelectedSummary();
+            });
+
+            itemCheckboxes.forEach((checkbox) => {
+                checkbox.addEventListener("change", () => {
+                    const checkedCount = Array.from(itemCheckboxes).filter((item) => item.checked).length;
+                    selectAll.checked = checkedCount === itemCheckboxes.length;
+                    updateSelectedSummary();
+                });
+            });
+
+            updateSelectedSummary();
+        }
+
+        if (checkoutButton) {
+            checkoutButton.addEventListener("click", () => {
+                const checkoutUrl = buildCheckoutUrl();
+                if (checkoutUrl) {
+                    window.location.href = checkoutUrl;
+                }
+            });
+        }
+
+        document.querySelectorAll(".cart-item-remove").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const productId = button.dataset.productId;
+                if (!productId) return;
+
+                const response = await fetch(`/Cart/Remove?productId=${productId}`, { method: "DELETE" });
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert("Не удалось удалить товар из корзины.");
+                }
+            });
+        });
+    </script>
+}
+

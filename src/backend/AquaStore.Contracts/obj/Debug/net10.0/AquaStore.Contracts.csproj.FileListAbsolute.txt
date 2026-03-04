@@ -1,0 +1,11 @@
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\bin\Debug\net10.0\AquaStore.Contracts.deps.json
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\bin\Debug\net10.0\AquaStore.Contracts.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\bin\Debug\net10.0\AquaStore.Contracts.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.AssemblyInfoInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.AssemblyInfo.cs
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.csproj.CoreCompileInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\refint\AquaStore.Contracts.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\AquaStore.Contracts.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\AquaStore.Contracts\obj\Debug\net10.0\ref\AquaStore.Contracts.dll

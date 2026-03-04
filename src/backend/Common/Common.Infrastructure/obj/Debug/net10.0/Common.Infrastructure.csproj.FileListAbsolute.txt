@@ -1,0 +1,17 @@
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Infrastructure.deps.json
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Infrastructure.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Infrastructure.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Application.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Domain.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Domain.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\bin\Debug\net10.0\Common.Application.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.csproj.AssemblyReference.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.AssemblyInfoInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.AssemblyInfo.cs
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.csproj.CoreCompileInputs.cache
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.I.562AF620.Up2Date
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\refint\Common.Infrastructure.dll
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\Common.Infrastructure.pdb
+D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Infrastructure\obj\Debug\net10.0\ref\Common.Infrastructure.dll

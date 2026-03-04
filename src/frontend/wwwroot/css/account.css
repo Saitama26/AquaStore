@@ -1,0 +1,339 @@
+.account-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 110px);
+    padding: 40px 16px;
+    overflow: hidden;
+    isolation: isolate;
+    background:
+        radial-gradient(120% 70% at 50% 120%, rgba(26, 145, 210, 0.34), rgba(6, 17, 47, 0.02) 55%),
+        linear-gradient(165deg, #061330 0%, #0b2252 36%, #0e3a75 70%, #1367a3 100%);
+    border-radius: 18px;
+}
+
+.account-wrapper::before,
+.account-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: auto -20% -22% -20%;
+    height: 48%;
+    z-index: -1;
+    border-radius: 50% 50% 0 0;
+    pointer-events: none;
+}
+
+.account-wrapper::before {
+    background: linear-gradient(180deg, rgba(73, 182, 237, 0.18), rgba(10, 29, 74, 0.55));
+    filter: blur(4px);
+}
+
+.account-wrapper::after {
+    inset: auto -15% -25% -15%;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(23, 123, 188, 0.25), rgba(8, 19, 52, 0.8));
+}
+
+.account-ocean-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* ---------- Sun rays ---------- */
+.sun-ray {
+    position: absolute;
+    top: -10%;
+    height: 120%;
+    pointer-events: none;
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.38) 0%,
+        rgba(200, 235, 255, 0.22) 18%,
+        rgba(150, 210, 245, 0.10) 45%,
+        rgba(100, 180, 230, 0.03) 72%,
+        transparent 100%
+    );
+    filter: blur(3px);
+    transform-origin: top center;
+    animation: rayPulse 7s ease-in-out infinite alternate;
+}
+
+.sun-ray-1 {
+    left: 15%;
+    width: 55px;
+    transform: rotate(12deg);
+    animation-delay: 0s;
+}
+
+.sun-ray-2 {
+    right: 18%;
+    width: 70px;
+    transform: rotate(-10deg);
+    animation-delay: -3s;
+}
+
+@keyframes rayPulse {
+    0%   { opacity: 0.55; filter: blur(4px); }
+    50%  { opacity: 1;    filter: blur(2px); }
+    100% { opacity: 0.7;  filter: blur(3px); }
+}
+
+.bubble {
+    position: absolute;
+    bottom: -70px;
+    border-radius: 999px;
+    background: radial-gradient(circle at 30% 30%, rgba(236, 250, 255, 0.92), rgba(173, 225, 255, 0.26) 72%);
+    border: 1px solid rgba(220, 245, 255, 0.68);
+    box-shadow:
+        0 0 0 2px rgba(188, 230, 255, 0.18) inset,
+        0 6px 16px rgba(150, 215, 255, 0.28);
+    opacity: 0.8;
+    animation: bubbleRise linear infinite;
+}
+
+.bubble-1 { left: 7%; width: 34px; height: 34px; animation-duration: 15s; animation-delay: -1s; }
+.bubble-2 { left: 18%; width: 22px; height: 22px; animation-duration: 11s; animation-delay: -5s; }
+.bubble-3 { left: 32%; width: 28px; height: 28px; animation-duration: 14s; animation-delay: -8s; }
+.bubble-4 { left: 46%; width: 38px; height: 38px; animation-duration: 17s; animation-delay: -4s; }
+.bubble-5 { left: 58%; width: 24px; height: 24px; animation-duration: 10s; animation-delay: -2s; }
+.bubble-6 { left: 71%; width: 30px; height: 30px; animation-duration: 13s; animation-delay: -7s; }
+.bubble-7 { left: 83%; width: 20px; height: 20px; animation-duration: 9s; animation-delay: -3s; }
+.bubble-8 { left: 92%; width: 34px; height: 34px; animation-duration: 16s; animation-delay: -9s; }
+
+@keyframes bubbleRise {
+    0% {
+        transform: translate3d(0, 0, 0) scale(0.7);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.6;
+    }
+    50% {
+        transform: translate3d(20px, -40vh, 0) scale(1);
+    }
+    100% {
+        transform: translate3d(-10px, -92vh, 0) scale(1.2);
+        opacity: 0;
+    }
+}
+
+.account-card {
+    width: min(500px, 100%);
+    background: linear-gradient(155deg, rgba(20, 56, 122, 0.52), rgba(10, 32, 84, 0.42));
+    backdrop-filter: blur(16px);
+    color: #f2fbff;
+    border-radius: 20px;
+    border: 1px solid rgba(180, 232, 255, 0.4);
+    padding: 26px;
+    box-shadow:
+        0 18px 44px rgba(3, 14, 36, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+}
+
+.account-card-wide {
+    width: min(560px, 100%);
+}
+
+.account-avatar {
+    width: 72px;
+    height: 72px;
+    margin: -48px auto 10px;
+    border-radius: 999px;
+    background: linear-gradient(160deg, #49bfe9, #2e90c8);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 10px 22px rgba(42, 147, 205, 0.35);
+    border: 2px solid rgba(222, 246, 255, 0.6);
+}
+
+.account-avatar svg {
+    width: 34px;
+    height: 34px;
+    fill: none;
+    stroke: #eff9ff;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.account-card h1 {
+    margin-bottom: 6px;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: #ebf8ff;
+}
+
+.account-subtitle {
+    margin: 0 0 14px;
+    color: rgba(227, 245, 255, 0.8);
+}
+
+.account-note {
+    margin-bottom: 12px;
+    color: rgba(212, 236, 255, 0.88);
+}
+
+.account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.account-form label {
+    font-weight: 600;
+    color: #d7efff;
+    margin-top: 4px;
+}
+
+.field-label {
+    margin-bottom: 2px;
+}
+
+.input-with-icon {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: rgba(205, 235, 252, 0.9);
+    pointer-events: none;
+}
+
+.input-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.account-form input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    padding-left: 42px;
+    border-radius: 999px;
+    border: 1px solid rgba(180, 228, 255, 0.28);
+    background: linear-gradient(160deg, rgba(33, 74, 142, 0.45), rgba(13, 29, 73, 0.45));
+    color: #f7fbff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.account-form input::placeholder {
+    color: rgba(200, 229, 248, 0.5);
+}
+
+.account-form input:focus,
+.account-form input:focus-visible {
+    outline: none;
+    border-color: rgba(133, 220, 255, 0.72);
+    box-shadow: 0 0 0 3px rgba(63, 180, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.submit-button {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(90deg, #73ceff 0%, #6ac7ff 48%, #62beff 100%);
+    color: #092141;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform 0.14s ease, filter 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 22px rgba(58, 170, 238, 0.28);
+}
+
+.submit-button:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
+}
+
+.submit-button:active {
+    transform: translateY(0);
+}
+
+.form-error {
+    background: rgba(255, 74, 74, 0.16);
+    border: 1px solid rgba(255, 158, 158, 0.28);
+    color: #ffd5d5;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 4px;
+}
+
+.field-error {
+    color: #ffd1d1;
+    font-size: 0.86rem;
+}
+
+.form-success {
+    background: rgba(52, 211, 153, 0.2);
+    border: 1px solid rgba(174, 245, 214, 0.25);
+    color: #ccf7e3;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.account-footer {
+    margin-top: 16px;
+    color: rgba(225, 245, 255, 0.84);
+    text-align: center;
+}
+
+.account-footer a {
+    color: #a9e8ff;
+    text-decoration: none;
+    margin-left: 6px;
+    font-weight: 700;
+}
+
+.account-footer a:hover {
+    color: #d4f4ff;
+}
+
+@media (max-width: 700px) {
+    .account-wrapper {
+        min-height: calc(100vh - 88px);
+        border-radius: 12px;
+    }
+
+    .account-card {
+        border-radius: 16px;
+        padding: 20px;
+    }
+
+    .account-avatar {
+        margin-top: -42px;
+    }
+}
+
+@media (max-width: 480px) {
+    .account-wrapper {
+        padding: 18px 10px;
+    }
+
+    .account-card h1 {
+        font-size: 28px;
+    }
+
+    .submit-button {
+        width: 100%;
+    }
+}
+

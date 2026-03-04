@@ -1,0 +1,536 @@
+@model frontend.ViewModels.ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.Product.Name;
+    Layout = "_Layout";
+
+    var hasDiscount = Model.Product.OldPrice.HasValue && Model.Product.OldPrice.Value > Model.Product.Price;
+    var discountPercent = hasDiscount
+        ? (int)((1 - Model.Product.Price / Model.Product.OldPrice!.Value) * 100)
+        : 0;
+    var description = Model.Product.Description ?? Model.Product.ShortDescription;
+    var avgRating = (int)Math.Round(Model.Product.AverageRating ?? 0);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/product-details.css" asp-append-version="true" />
+}
+
+<!-- ═══════ PRODUCT CARD ═══════ -->
+<div class="pd-card">
+    <!-- Left: Gallery -->
+    <div class="pd-gallery">
+        <div class="pd-badges">
+            @if (hasDiscount)
+            {
+                <span class="pd-badge pd-badge-discount">-@(discountPercent)%</span>
+            }
+            @if (Model.Product.IsFeatured)
+            {
+                <span class="pd-badge pd-badge-hit">ХИТ</span>
+            }
+            @if (!Model.Product.IsInStock)
+            {
+                <span class="pd-badge pd-badge-oos">Нет в наличии</span>
+            }
+        </div>
+
+        <div class="pd-main-img">
+            @if (!string.IsNullOrEmpty(Model.Product.MainImageUrl))
+            {
+                <img id="main-product-image" src="@Model.Product.MainImageUrl" alt="@Model.Product.Name" />
+            }
+            else
+            {
+                <img id="main-product-image" src="~/images/water-filter.svg" alt="Нет изображения" class="pd-fallback" />
+            }
+        </div>
+
+        <div class="pd-thumbs">
+            @if (Model.Product.Images != null && Model.Product.Images.Count > 0)
+            {
+                foreach (var image in Model.Product.Images)
+                {
+                    <img class="pd-thumb @(image.IsMain ? "active" : "")"
+                         src="@image.Url"
+                         data-full="@image.Url"
+                         alt="@(image.AltText ?? Model.Product.Name)" />
+                }
+            }
+            else if (!string.IsNullOrEmpty(Model.Product.MainImageUrl))
+            {
+                <img class="pd-thumb active" src="@Model.Product.MainImageUrl" data-full="@Model.Product.MainImageUrl" alt="@Model.Product.Name" />
+            }
+        </div>
+    </div>
+
+    <!-- Right: Info -->
+    <div class="pd-info">
+        <!-- Brand & Category -->
+        <div class="pd-meta">
+            <span class="pd-brand">@Model.Product.BrandName</span>
+            <span class="pd-sep">•</span>
+            <span class="pd-category">@Model.Product.CategoryName</span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="pd-title">@Model.Product.Name</h1>
+
+        <!-- Rating summary row -->
+        <div class="pd-rating-row">
+            <div class="pd-stars" aria-label="Средняя оценка">
+                @for (var i = 1; i <= 5; i++)
+                {
+                    <span class="pd-star @(i <= avgRating ? "filled" : "")">★</span>
+                }
+            </div>
+            <span class="pd-rating-value">@(Model.Product.AverageRating?.ToString("0.0") ?? "—")</span>
+            <a href="#reviews-section" class="pd-review-count">@Model.Product.ReviewCount отзывов</a>
+        </div>
+
+        <!-- Price block -->
+        <div class="pd-price-block">
+            <span class="pd-price-current">@Model.Product.Price.ToString("N2") @Model.Product.Currency</span>
+            @if (hasDiscount)
+            {
+                <span class="pd-price-old">@Model.Product.OldPrice!.Value.ToString("N2") @Model.Product.Currency</span>
+            }
+        </div>
+
+        <!-- Short description -->
+        @if (!string.IsNullOrEmpty(Model.Product.ShortDescription))
+        {
+            <p class="pd-short-desc">@Model.Product.ShortDescription</p>
+        }
+
+        <!-- Specs mini -->
+        <div class="pd-specs-mini">
+            <div class="pd-spec-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>@(Model.Product.IsInStock ? "В наличии" : "Под заказ")</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Product.FilterTypeName))
+            {
+                <div class="pd-spec-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                    <span>@Model.Product.FilterTypeName</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.Product.Sku))
+            {
+                <div class="pd-spec-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span>Артикул: @Model.Product.Sku</span>
+                </div>
+            }
+        </div>
+
+        <!-- Action buttons -->
+        <div class="pd-actions">
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <button type="button" class="pd-btn pd-btn-cart" onclick="addToCart('@Model.Product.Id', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM20 21a1 1 0 1 0 0-2 1 1 0 0 0 0 2zM1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                    <span>Добавить в корзину</span>
+                </button>
+                <button type="button" class="pd-btn pd-btn-buy" onclick="buyNow('@Model.Product.Id', this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                    <span>Купить сейчас</span>
+                </button>
+            }
+            else
+            {
+                <div class="pd-auth-notice">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Войдите в аккаунт, чтобы добавлять товары в корзину</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- ═══════ TABS SECTION ═══════ -->
+<div class="pd-tabs-wrapper">
+    <div class="pd-tabs-nav" role="tablist">
+        <button class="pd-tab active" data-tab="description" role="tab" aria-selected="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Описание
+        </button>
+        <button class="pd-tab" data-tab="reviews" role="tab" aria-selected="false" id="reviews-tab-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Отзывы
+            @if (Model.Product.ReviewCount > 0)
+            {
+                <span class="pd-tab-badge">@Model.Product.ReviewCount</span>
+            }
+        </button>
+        <button class="pd-tab" data-tab="similar" role="tab" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Похожие
+            @if (Model.SimilarProducts.Count > 0)
+            {
+                <span class="pd-tab-badge">@Model.SimilarProducts.Count</span>
+            }
+        </button>
+    </div>
+
+    <!-- Tab: Description -->
+    <div class="pd-tab-panel active" data-panel="description" role="tabpanel">
+        @if (!string.IsNullOrEmpty(description))
+        {
+            <div class="pd-description">
+                @Html.Raw(description!.Replace("\n", "<br/>"))
+            </div>
+        }
+        else
+        {
+            <p class="pd-empty-msg">Описание для этого товара пока не добавлено.</p>
+        }
+
+        <!-- Full specs -->
+        <div class="pd-specs-full">
+            <h3>Характеристики</h3>
+            <table class="pd-specs-table">
+                <tbody>
+                    <tr>
+                        <td>Бренд</td>
+                        <td>@Model.Product.BrandName</td>
+                    </tr>
+                    <tr>
+                        <td>Категория</td>
+                        <td>@Model.Product.CategoryName</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.Product.FilterTypeName))
+                    {
+                        <tr>
+                            <td>Тип фильтра</td>
+                            <td>@Model.Product.FilterTypeName</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Наличие</td>
+                        <td>@(Model.Product.IsInStock ? "В наличии" : "Нет в наличии")</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty(Model.Product.Sku))
+                    {
+                        <tr>
+                            <td>Артикул</td>
+                            <td>@Model.Product.Sku</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Средняя оценка</td>
+                        <td>@(Model.Product.AverageRating?.ToString("0.0") ?? "—") из 5</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Reviews -->
+    <div class="pd-tab-panel" data-panel="reviews" role="tabpanel" id="reviews-section">
+        <div class="product-reviews" data-slug="@Model.Product.Slug" data-product-id="@Model.Product.Id" data-page-size="@Model.Reviews.PageSize">
+
+            <div id="reviews-list">
+                @if (Model.Reviews.Items.Count == 0)
+                {
+                    <p class="pd-empty-msg">Пока нет отзывов. Будьте первым!</p>
+                }
+                else
+                {
+                    <div class="reviews-list">
+                        @foreach (var review in Model.Reviews.Items)
+                        {
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="review-user-info">
+                                        <div class="review-avatar">@review.UserName[0]</div>
+                                        <div>
+                                            <strong>@review.UserName</strong>
+                                            <span class="review-date">@review.CreatedAt.ToString("dd.MM.yyyy")</span>
+                                        </div>
+                                    </div>
+                                    <span class="stars" aria-label="Оценка">
+                                        @for (var i = 1; i <= 5; i++)
+                                        {
+                                            <span class="star @(i <= review.Rating ? "filled" : "")">★</span>
+                                        }
+                                    </span>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(review.Comment))
+                                {
+                                    <p class="review-text">@review.Comment</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <div id="reviews-pagination">
+                @if (Model.Reviews.TotalPages > 1)
+                {
+                    <div class="reviews-pagination">
+                        @if (Model.Reviews.HasPreviousPage)
+                        {
+                            <button type="button" class="btn-link" data-page="@(Model.Reviews.PageNumber - 1)">← Назад</button>
+                        }
+                        <span>Страница @Model.Reviews.PageNumber из @Model.Reviews.TotalPages</span>
+                        @if (Model.Reviews.HasNextPage)
+                        {
+                            <button type="button" class="btn-link" data-page="@(Model.Reviews.PageNumber + 1)">Вперёд →</button>
+                        }
+                    </div>
+                }
+            </div>
+
+            @if (User?.Identity?.IsAuthenticated == true)
+            {
+                <div class="review-form" id="review-form">
+                    <h3>Оставить отзыв</h3>
+                    <form asp-action="CreateReview" asp-controller="Products" asp-route-slug="@Model.Product.Slug" method="post">
+                        <input type="hidden" asp-for="NewReview.ProductId" />
+                        <input type="hidden" asp-for="NewReview.Slug" />
+
+                        <div class="field">
+                            <label asp-for="NewReview.Rating">Оценка</label>
+                            <div class="review-star-select" id="star-select">
+                                @for (var i = 1; i <= 5; i++)
+                                {
+                                    <span class="star-select-item @(i <= 5 ? "filled" : "")" data-value="@i">★</span>
+                                }
+                            </div>
+                            <select asp-for="NewReview.Rating" class="review-rating-hidden" id="rating-select">
+                                <option value="5">5</option>
+                                <option value="4">4</option>
+                                <option value="3">3</option>
+                                <option value="2">2</option>
+                                <option value="1">1</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label asp-for="NewReview.Comment">Комментарий</label>
+                            <textarea asp-for="NewReview.Comment" rows="3" placeholder="Расскажите о вашем опыте..."></textarea>
+                        </div>
+                        <button type="submit" class="pd-btn pd-btn-cart">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Отправить
+                        </button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <div class="pd-auth-notice" style="margin-top: 20px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Войдите в аккаунт, чтобы оставить отзыв.</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Tab: Similar -->
+    <div class="pd-tab-panel" data-panel="similar" role="tabpanel">
+        @if (Model.SimilarProducts.Count > 0)
+        {
+            @Html.CreateCards(Model.SimilarProducts)
+        }
+        else
+        {
+            <p class="pd-empty-msg">Пока нет подходящих рекомендаций для этого товара.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // ══════ Thumbnail click ══════
+            const mainImage = document.getElementById("main-product-image");
+            const thumbs = document.querySelectorAll(".pd-thumb");
+            if (mainImage && thumbs.length) {
+                thumbs.forEach(thumb => {
+                    thumb.addEventListener("click", () => {
+                        const full = thumb.getAttribute("data-full");
+                        if (full) mainImage.src = full;
+                        thumbs.forEach(t => t.classList.remove("active"));
+                        thumb.classList.add("active");
+                    });
+                });
+            }
+
+            // ══════ Tabs ══════
+            const tabs = document.querySelectorAll(".pd-tab");
+            const panels = document.querySelectorAll(".pd-tab-panel");
+
+            function switchTab(targetTab) {
+                const target = targetTab.getAttribute("data-tab");
+
+                tabs.forEach(t => {
+                    t.classList.remove("active");
+                    t.setAttribute("aria-selected", "false");
+                });
+                targetTab.classList.add("active");
+                targetTab.setAttribute("aria-selected", "true");
+
+                panels.forEach(p => {
+                    if (p.getAttribute("data-panel") === target) {
+                        p.classList.add("active");
+                    } else {
+                        p.classList.remove("active");
+                    }
+                });
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener("click", () => switchTab(tab));
+            });
+
+            // Scroll-to-reviews link
+            const reviewLink = document.querySelector(".pd-review-count");
+            if (reviewLink) {
+                reviewLink.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const reviewsTabBtn = document.getElementById("reviews-tab-btn");
+                    if (reviewsTabBtn) switchTab(reviewsTabBtn);
+                    const section = document.getElementById("reviews-section");
+                    if (section) {
+                        section.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                });
+            }
+
+            // ══════ Star select for review form ══════
+            const starSelect = document.getElementById("star-select");
+            const ratingSelect = document.getElementById("rating-select");
+            if (starSelect && ratingSelect) {
+                const starItems = starSelect.querySelectorAll(".star-select-item");
+                starItems.forEach(item => {
+                    item.addEventListener("click", () => {
+                        const value = parseInt(item.getAttribute("data-value"), 10);
+                        ratingSelect.value = value;
+                        starItems.forEach((s, idx) => {
+                            s.classList.toggle("filled", idx < value);
+                        });
+                    });
+                    item.addEventListener("mouseenter", () => {
+                        const value = parseInt(item.getAttribute("data-value"), 10);
+                        starItems.forEach((s, idx) => {
+                            s.classList.toggle("hover", idx < value);
+                        });
+                    });
+                    item.addEventListener("mouseleave", () => {
+                        starItems.forEach(s => s.classList.remove("hover"));
+                    });
+                });
+            }
+
+            // ══════ Reviews AJAX ══════
+            const reviewsBlock = document.querySelector(".product-reviews");
+            if (!reviewsBlock) return;
+
+            const slug = reviewsBlock.getAttribute("data-slug");
+            const pageSize = parseInt(reviewsBlock.getAttribute("data-page-size") || "5", 10);
+            const reviewsList = document.getElementById("reviews-list");
+            const pagination = document.getElementById("reviews-pagination");
+            const form = document.querySelector("#review-form form");
+
+            const renderStars = (rating) => {
+                let stars = "";
+                for (let i = 1; i <= 5; i++) {
+                    stars += `<span class="star ${i <= rating ? "filled" : ""}">★</span>`;
+                }
+                return stars;
+            };
+
+            const renderReviews = (data) => {
+                if (!data.items || data.items.length === 0) {
+                    reviewsList.innerHTML = '<p class="pd-empty-msg">Пока нет отзывов. Будьте первым!</p>';
+                } else {
+                    const cards = data.items.map(r => {
+                        const date = new Date(r.createdAt).toLocaleDateString("ru-RU");
+                        const comment = r.comment ? `<p class="review-text">${r.comment}</p>` : "";
+                        const initial = r.userName ? r.userName[0] : "?";
+                        return `
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="review-user-info">
+                                        <div class="review-avatar">${initial}</div>
+                                        <div>
+                                            <strong>${r.userName}</strong>
+                                            <span class="review-date">${date}</span>
+                                        </div>
+                                    </div>
+                                    <span class="stars" aria-label="Оценка">${renderStars(r.rating)}</span>
+                                </div>
+                                ${comment}
+                            </div>`;
+                    }).join("");
+                    reviewsList.innerHTML = `<div class="reviews-list">${cards}</div>`;
+                }
+
+                if (data.totalPages > 1) {
+                    const prev = data.hasPreviousPage
+                        ? `<button type="button" class="btn-link" data-page="${data.pageNumber - 1}">← Назад</button>`
+                        : "";
+                    const next = data.hasNextPage
+                        ? `<button type="button" class="btn-link" data-page="${data.pageNumber + 1}">Вперёд →</button>`
+                        : "";
+                    pagination.innerHTML = `
+                        <div class="reviews-pagination">
+                            ${prev}
+                            <span>Страница ${data.pageNumber} из ${data.totalPages}</span>
+                            ${next}
+                        </div>`;
+                } else {
+                    pagination.innerHTML = "";
+                }
+            };
+
+            const loadReviews = async (page) => {
+                reviewsBlock.classList.add("is-loading");
+                const response = await fetch(`/products/${slug}/reviews?pageNumber=${page}&pageSize=${pageSize}`);
+                if (!response.ok) { reviewsBlock.classList.remove("is-loading"); return; }
+                const payload = await response.json();
+                if (payload && payload.success) renderReviews(payload.data);
+                reviewsBlock.classList.remove("is-loading");
+            };
+
+            pagination.addEventListener("click", (event) => {
+                const button = event.target.closest("button[data-page]");
+                if (!button) return;
+                const page = parseInt(button.getAttribute("data-page"), 10);
+                if (page) loadReviews(page);
+            });
+
+            if (form) {
+                form.addEventListener("submit", async (event) => {
+                    event.preventDefault();
+                    reviewsBlock.classList.add("is-loading");
+                    const response = await fetch(form.action, {
+                        method: "POST",
+                        credentials: "same-origin",
+                        headers: { "Accept": "application/json" },
+                        body: new FormData(form)
+                    });
+                    if (!response.ok) { reviewsBlock.classList.remove("is-loading"); return; }
+                    const payload = await response.json();
+                    if (payload && payload.success) {
+                        form.reset();
+                        // Reset star select visually
+                        const starItems = document.querySelectorAll(".star-select-item");
+                        starItems.forEach((s, idx) => s.classList.toggle("filled", idx < 5));
+                        if (ratingSelect) ratingSelect.value = "5";
+                        await loadReviews(1);
+                        showNotification("Отзыв отправлен!", "success");
+                    }
+                    reviewsBlock.classList.remove("is-loading");
+                });
+            }
+        });
+    </script>
+}

@@ -1,0 +1,79 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|d:\\programing\\csharp\\aspnet\\aquastore\\src\\backend\\aquastore.api\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|solutionrelative:aquastore.api\\controllers\\apicontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|d:\\programing\\csharp\\aspnet\\aquastore\\src\\backend\\aquastore.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|solutionrelative:aquastore.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|d:\\programing\\csharp\\aspnet\\aquastore\\src\\backend\\aquastore.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D5924D49-5E2A-1946-8BA9-DE6C7065C1BD}|AquaStore.Api\\AquaStore.Api.csproj|solutionrelative:aquastore.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{905da7d1-18fd-4a46-8d0f-a5ff58ada9de}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ApiController.cs",
+              "DocumentMoniker": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Controllers\\ApiController.cs",
+              "RelativeDocumentMoniker": "AquaStore.Api\\Controllers\\ApiController.cs",
+              "ToolTip": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Controllers\\ApiController.cs",
+              "RelativeToolTip": "AquaStore.Api\\Controllers\\ApiController.cs",
+              "ViewState": "AgIAAC4AAAAAAAAAAAAgwE8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-23T06:46:55.937Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "AquaStore.Api\\Controllers\\AuthController.cs",
+              "ToolTip": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "AquaStore.Api\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-23T06:46:53.685Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Program.cs",
+              "RelativeDocumentMoniker": "AquaStore.Api\\Program.cs",
+              "ToolTip": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\Program.cs",
+              "RelativeToolTip": "AquaStore.Api\\Program.cs",
+              "ViewState": "AgIAADYAAAAAAAAAAAAwwFkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-23T06:45:57.111Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,143 @@
+@model frontend.ViewModels.OrderDetailViewModel
+@{
+    ViewData["Title"] = "Квитанция";
+    Layout = "_Layout";
+    var statusCode = Model.Status;
+    var isCancelled = statusCode == 5;
+    var progressStep = statusCode switch
+    {
+        >= 0 and <= 4 => statusCode,
+        _ => 0
+    };
+    var statusLabel = statusCode switch
+    {
+        0 => "Заказ принят",
+        1 => "Подтвержден",
+        2 => "Сборка заказа",
+        3 => "Передан в доставку",
+        4 => "Доставлен",
+        5 => "Отменен",
+        _ => "В обработке"
+    };
+    var statusDescription = statusCode switch
+    {
+        0 => "Мы получили заказ и передали его менеджеру.",
+        1 => "Заказ подтвержден и поставлен в очередь на сборку.",
+        2 => "Сейчас комплектуем ваш заказ на складе.",
+        3 => "Курьерская служба уже везет ваш заказ.",
+        4 => "Заказ успешно доставлен. Спасибо за покупку!",
+        5 => "Заказ отменен. Если нужна помощь, свяжитесь с поддержкой.",
+        _ => "Статус уточняется."
+    };
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/receipt.css" asp-append-version="true" />
+}
+
+<div class="receipt-page">
+    <div class="receipt-card">
+        <div class="receipt-header">
+            <h1>Квитанция об оформлении заказа</h1>
+            <div class="receipt-number">№ @Model.OrderNumber</div>
+            <div class="receipt-date">Дата: @Model.CreatedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</div>
+        </div>
+
+        <div class="receipt-section">
+            <h3>Статус заказа</h3>
+            <div class="receipt-status">
+                <div class="receipt-status-badge @(isCancelled ? "cancelled" : string.Empty)">@statusLabel</div>
+                <div class="receipt-status-description">@statusDescription</div>
+
+                @if (!isCancelled)
+                {
+                    <div class="receipt-status-steps">
+                        <div class="receipt-step @(progressStep >= 0 ? "done" : string.Empty)">
+                            <span class="step-dot"></span>
+                            <span>Принят</span>
+                        </div>
+                        <div class="receipt-step @(progressStep >= 1 ? "done" : string.Empty)">
+                            <span class="step-dot"></span>
+                            <span>Подтвержден</span>
+                        </div>
+                        <div class="receipt-step @(progressStep >= 2 ? "done" : string.Empty)">
+                            <span class="step-dot"></span>
+                            <span>Сборка</span>
+                        </div>
+                        <div class="receipt-step @(progressStep >= 3 ? "done" : string.Empty)">
+                            <span class="step-dot"></span>
+                            <span>Доставка</span>
+                        </div>
+                        <div class="receipt-step @(progressStep >= 4 ? "done" : string.Empty)">
+                            <span class="step-dot"></span>
+                            <span>Доставлен</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="receipt-section">
+            <h3>Адрес доставки</h3>
+            <p>
+                @Model.ShippingAddress.City, @Model.ShippingAddress.Street,
+                @Model.ShippingAddress.Building
+                @if (!string.IsNullOrWhiteSpace(Model.ShippingAddress.Apartment))
+                {
+                    <span>, кв. @Model.ShippingAddress.Apartment</span>
+                }
+            </p>
+            <p>Индекс: @Model.ShippingAddress.PostalCode</p>
+        </div>
+
+        <div class="receipt-section">
+            <h3>Состав заказа</h3>
+            <div class="receipt-items">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="receipt-item">
+                        <span>@item.ProductName</span>
+                        <span>@item.Quantity × @item.UnitPrice.ToString("N2") @Model.Currency</span>
+                        <span>@item.TotalPrice.ToString("N2") @Model.Currency</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="receipt-total">
+            <div>
+                <span>Подытог</span>
+                <span>@Model.SubTotal.ToString("N2") @Model.Currency</span>
+            </div>
+            <div>
+                <span>Доставка</span>
+                <span>@Model.ShippingCost.ToString("N2") @Model.Currency</span>
+            </div>
+            @if (Model.Discount.HasValue)
+            {
+                <div>
+                    <span>Скидка</span>
+                    <span>-@Model.Discount.Value.ToString("N2") @Model.Currency</span>
+                </div>
+            }
+            <div class="total">
+                <span>Итого</span>
+                <span>@Model.TotalAmount.ToString("N2") @Model.Currency</span>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.CustomerNote))
+        {
+            <div class="receipt-section">
+                <h3>Комментарий</h3>
+                <p>@Model.CustomerNote</p>
+            </div>
+        }
+
+        <div class="receipt-footer">
+            <a class="receipt-link" href="/account/profile">Перейти в историю покупок</a>
+            <a class="receipt-link secondary" href="/catalog">Продолжить покупки</a>
+        </div>
+    </div>
+</div>
+
