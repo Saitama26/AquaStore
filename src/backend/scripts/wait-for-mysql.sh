@@ -19,4 +19,3 @@ done
 
 echo "MySQL did not become ready in time."
 exit 1
-

@@ -1,48 +1,42 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj": {}
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj": {}
   },
   "projects": {
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj",
         "projectName": "AquaStore.Api",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Api\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Api\\AquaStore.Api.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Api\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
               }
             }
           }
@@ -57,7 +51,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -89,6 +83,10 @@
               "target": "Package",
               "version": "[2.3.0, )"
             },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2024.7.1, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[10.0.1, )"
@@ -113,7 +111,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -531,45 +529,39 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj",
         "projectName": "AquaStore.Application",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
               }
             }
           }
@@ -584,7 +576,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -611,7 +603,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -889,28 +881,22 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj",
         "projectName": "AquaStore.Contracts",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Contracts\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\AquaStore.Contracts.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Contracts\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -929,7 +915,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -950,7 +936,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1228,39 +1214,33 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj",
         "projectName": "AquaStore.Domain",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
               }
             }
           }
@@ -1275,7 +1255,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -1296,7 +1276,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1574,42 +1554,36 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
         "projectName": "AquaStore.Infrastructure",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
               }
             }
           }
@@ -1624,7 +1598,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -1657,7 +1631,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -1935,36 +1909,30 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj",
         "projectName": "Common.Application",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
               }
             }
           }
@@ -1979,7 +1947,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -2022,7 +1990,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -2300,28 +2268,22 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj",
         "projectName": "Common.Domain",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -2340,7 +2302,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -2367,7 +2329,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -2645,39 +2607,33 @@
         }
       }
     },
-    "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
+    "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj",
+        "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj",
         "projectName": "Common.Infrastructure",
-        "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\obj\\",
+        "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+        "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Application\\Common.Application.csproj"
               },
-              "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
-                "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
+              "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj": {
+                "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Domain\\Common.Domain.csproj"
               }
             }
           }
@@ -2692,7 +2648,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.200"
       },
       "frameworks": {
         "net10.0": {
@@ -2743,7 +2699,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

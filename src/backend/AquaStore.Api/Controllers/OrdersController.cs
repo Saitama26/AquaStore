@@ -1,7 +1,10 @@
 using System.Text;
+using AquaStore.Api.Services;
 using AquaStore.Application.Orders.Commands;
 using AquaStore.Application.Orders.Queries;
+using AquaStore.Contracts.Common;
 using AquaStore.Contracts.Orders.Requests;
+using AquaStore.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -89,6 +92,154 @@ public class OrdersController : ApiController
     }
 
     /// <summary>
+    /// Получить PDF-чек заказа
+    /// </summary>
+    [HttpGet("{id:guid}/receipt/pdf")]
+    [Produces("application/pdf")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetReceiptPdf(Guid id)
+    {
+        var query = new GetOrderByIdQuery(id);
+        var result = await Sender.Send(query);
+
+        if (!result.IsSuccess)
+        {
+            return HandleResult(result);
+        }
+
+        var pdfBytes = OrderReceiptPdfGenerator.Generate(result.Value);
+        var safeOrderNumber = result.Value.OrderNumber.Replace(" ", string.Empty);
+        var fileName = $"aquastore-receipt-{safeOrderNumber}.pdf";
+
+        return File(pdfBytes, "application/pdf", fileName);
+    }
+
+    /// <summary>
+    /// Обновить статус заказа (только Admin)
+    /// </summary>
+    [HttpPatch("{id:guid}/status")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateOrderStatus(
+        Guid id,
+        [FromBody] UpdateOrderStatusRequest request)
+    {
+        if (!Enum.IsDefined(typeof(OrderStatus), request.Status))
+        {
+            return BadRequest(ApiResponse<object>.Fail(
+                "Недопустимый статус заказа.",
+                [new ApiError("Order.InvalidStatus", "Недопустимый статус заказа.")]));
+        }
+
+        var command = new AdminUpdateOrderStatusCommand(id, (OrderStatus)request.Status);
+        var result = await Sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Получить расширенную аналитику заказов (только Admin)
+    /// </summary>
+    [HttpGet("analytics")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAnalytics(
+        [FromQuery] int topProducts = 10,
+        [FromQuery] int topUsers = 10)
+    {
+        var query = new GetOrderAnalyticsQuery(topProducts, topUsers);
+        var result = await Sender.Send(query);
+        return HandleResult(result);
+    }
+
+    /// <summary>
+    /// Экспорт расширенной аналитики по заказам в CSV (только Admin)
+    /// </summary>
+    [HttpGet("analytics/export/csv")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> ExportAnalyticsCsv(
+        [FromQuery] int topProducts = 10,
+        [FromQuery] int topUsers = 10)
+    {
+        var query = new GetOrderAnalyticsQuery(topProducts, topUsers);
+        var result = await Sender.Send(query);
+
+        if (!result.IsSuccess)
+        {
+            return HandleResult(result);
+        }
+
+        var analytics = result.Value;
+        var sb = new StringBuilder();
+        sb.AppendLine("sep=;");
+        sb.AppendLine("AquaStore Ocean Analytics");
+        sb.AppendLine($"GeneratedUtc;{analytics.GeneratedAtUtc:yyyy-MM-dd HH:mm:ss}");
+        sb.AppendLine();
+
+        sb.AppendLine("Overview");
+        sb.AppendLine("Metric;Value");
+        sb.AppendLine($"TotalOrders;{analytics.TotalOrders}");
+        sb.AppendLine($"CancelledOrders;{analytics.CancelledOrders}");
+        sb.AppendLine($"DeliveredOrders;{analytics.DeliveredOrders}");
+        sb.AppendLine($"UniqueCustomers;{analytics.UniqueCustomers}");
+        sb.AppendLine($"TotalRevenue;{analytics.TotalRevenue.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        sb.AppendLine($"AverageOrderValue;{analytics.AverageOrderValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        sb.AppendLine($"Currency;{EscapeCsv(analytics.Currency)}");
+        sb.AppendLine();
+
+        sb.AppendLine("OrderStatusBreakdown");
+        sb.AppendLine("Status;Count;SharePercent");
+        foreach (var item in analytics.StatusBreakdown)
+        {
+            sb.AppendLine($"{EscapeCsv(ToStatusName(item.Status))};{item.Count};{item.SharePercent.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("TopProductsByQuantity");
+        sb.AppendLine("Rank;Product;UnitsSold;Revenue;OrdersCount");
+        for (var i = 0; i < analytics.TopProductsByQuantity.Count; i++)
+        {
+            var item = analytics.TopProductsByQuantity[i];
+            sb.AppendLine($"{i + 1};{EscapeCsv(item.ProductName)};{item.UnitsSold};{item.Revenue.ToString(System.Globalization.CultureInfo.InvariantCulture)};{item.OrdersCount}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("TopProductsByRevenue");
+        sb.AppendLine("Rank;Product;Revenue;UnitsSold;OrdersCount");
+        for (var i = 0; i < analytics.TopProductsByRevenue.Count; i++)
+        {
+            var item = analytics.TopProductsByRevenue[i];
+            sb.AppendLine($"{i + 1};{EscapeCsv(item.ProductName)};{item.Revenue.ToString(System.Globalization.CultureInfo.InvariantCulture)};{item.UnitsSold};{item.OrdersCount}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("TopUsersBySpend");
+        sb.AppendLine("Rank;UserName;UserEmail;OrdersCount;TotalSpent;AverageOrderValue");
+        for (var i = 0; i < analytics.TopUsersBySpend.Count; i++)
+        {
+            var item = analytics.TopUsersBySpend[i];
+            sb.AppendLine($"{i + 1};{EscapeCsv(item.UserName)};{EscapeCsv(item.UserEmail)};{item.OrdersCount};{item.TotalSpent.ToString(System.Globalization.CultureInfo.InvariantCulture)};{item.AverageOrderValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        }
+        sb.AppendLine();
+
+        sb.AppendLine("TopUsersByOrdersCount");
+        sb.AppendLine("Rank;UserName;UserEmail;OrdersCount;TotalSpent;AverageOrderValue");
+        for (var i = 0; i < analytics.TopUsersByOrdersCount.Count; i++)
+        {
+            var item = analytics.TopUsersByOrdersCount[i];
+            sb.AppendLine($"{i + 1};{EscapeCsv(item.UserName)};{EscapeCsv(item.UserEmail)};{item.OrdersCount};{item.TotalSpent.ToString(System.Globalization.CultureInfo.InvariantCulture)};{item.AverageOrderValue.ToString(System.Globalization.CultureInfo.InvariantCulture)}");
+        }
+
+        var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
+        var bytes = Encoding.UTF8.GetPreamble().Concat(contentBytes).ToArray();
+        var fileName = $"analytics-stat-{DateTime.UtcNow:yyyyMMdd-HHmmss}.csv";
+        return File(bytes, "text/csv", fileName);
+    }
+
+    /// <summary>
     /// Экспорт статистики заказов в CSV (для админа)
     /// </summary>
     [HttpGet("export/csv")]
@@ -135,5 +286,35 @@ public class OrdersController : ApiController
         var result = await Sender.Send(command);
 
         return HandleResult(result);
+    }
+
+    private static string EscapeCsv(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var normalized = value.Replace("\r", " ").Replace("\n", " ").Trim();
+        if (normalized.Contains(';') || normalized.Contains('"'))
+        {
+            return $"\"{normalized.Replace("\"", "\"\"")}\"";
+        }
+
+        return normalized;
+    }
+
+    private static string ToStatusName(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Ожидает",
+            OrderStatus.Confirmed => "Подтверждён",
+            OrderStatus.Processing => "В обработке",
+            OrderStatus.Shipped => "Отправлен",
+            OrderStatus.Delivered => "Доставлен",
+            OrderStatus.Cancelled => "Отменён",
+            _ => "Неизвестно"
+        };
     }
 }

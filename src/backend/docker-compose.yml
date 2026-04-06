@@ -1,6 +1,7 @@
 services:
   # Шаг 1: Запуск MySQL сервера
   mysql:
+    platform: linux/arm64
     image: mysql:8.0
     container_name: aquastore-mysql
     restart: unless-stopped
@@ -24,6 +25,7 @@ services:
 
   # Шаг 2: Инициализация БД (создание БД и пользователя)
   db-init:
+    platform: linux/arm64
     image: mysql:8.0
     container_name: aquastore-db-init
     depends_on:
@@ -43,6 +45,7 @@ services:
 
   # Шаг 3: Запуск API приложения
   api:
+    platform: linux/arm64
     build:
       context: .
       dockerfile: Dockerfile
@@ -94,6 +97,7 @@ services:
 
   # Шаг 4: Запуск Frontend (Production)
   frontend:
+    platform: linux/arm64
     build:
       context: ../frontend
       dockerfile: Dockerfile

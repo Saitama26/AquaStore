@@ -10,3 +10,16 @@ D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Domain\obj\Debug
 D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\refint\Common.Domain.dll
 D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.pdb
 D:\Programing\CSharp\aspnet\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\ref\Common.Domain.dll
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\bin\Debug\net10.0\Common.Domain.deps.json
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\bin\Debug\net10.0\Common.Domain.dll
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\bin\Debug\net10.0\Common.Domain.pdb
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.csproj.AssemblyReference.cache
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.GeneratedMSBuildEditorConfig.editorconfig
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.AssemblyInfoInputs.cache
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.AssemblyInfo.cs
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.csproj.CoreCompileInputs.cache
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.sourcelink.json
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.dll
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\refint\Common.Domain.dll
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\Common.Domain.pdb
+H:\WPFCsharp\AquaStore\src\backend\Common\Common.Domain\obj\Debug\net10.0\ref\Common.Domain.dll

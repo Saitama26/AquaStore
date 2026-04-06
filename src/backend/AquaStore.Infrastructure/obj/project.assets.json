@@ -3082,45 +3082,38 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\user\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Saitama\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
+      "projectUniqueName": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
       "projectName": "AquaStore.Infrastructure",
-      "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-      "outputPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\obj\\",
+      "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\AquaStore.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\Saitama\\.nuget\\packages\\",
+      "outputPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\Saitama\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
-              "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
+            "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj": {
+              "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Application\\AquaStore.Application.csproj"
             },
-            "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
-              "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
+            "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj": {
+              "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\AquaStore.Domain\\AquaStore.Domain.csproj"
             },
-            "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
-              "projectPath": "D:\\Programing\\CSharp\\aspnet\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
+            "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj": {
+              "projectPath": "H:\\WPFCsharp\\AquaStore\\src\\backend\\Common\\Common.Infrastructure\\Common.Infrastructure.csproj"
             }
           }
         }
@@ -3135,7 +3128,7 @@
         "auditLevel": "low",
         "auditMode": "all"
       },
-      "SdkAnalysisLevel": "10.0.100"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net10.0": {
@@ -3168,7 +3161,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -3445,5 +3438,17 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1903",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "У пакета \"AutoMapper\" 16.0.0 есть известная уязвимость https://github.com/advisories/GHSA-rvv3-g6hj-g44x (уровень серьезности: высокий уровень)",
+      "libraryId": "AutoMapper",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }
