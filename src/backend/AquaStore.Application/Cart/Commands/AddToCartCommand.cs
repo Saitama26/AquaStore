@@ -43,6 +43,11 @@ internal sealed class AddToCartCommandHandler : ICommandHandler<AddToCartCommand
             return Result.Failure(UserErrors.InvalidCredentials);
         }
 
+        if (request.Quantity <= 0)
+        {
+            return Result.Failure(CartErrors.InvalidQuantity);
+        }
+
         // Проверяем товар
         var product = await _productRepository.GetByIdAsync(request.ProductId, cancellationToken);
 
@@ -60,6 +65,17 @@ internal sealed class AddToCartCommandHandler : ICommandHandler<AddToCartCommand
         var cart = await _cartRepository.GetOrCreateAsync(
             _currentUserService.UserId.Value,
             cancellationToken);
+
+        var existingItem = cart.Items.FirstOrDefault(i => i.ProductId == product.Id);
+        var requestedTotal = (existingItem?.Quantity ?? 0) + request.Quantity;
+
+        if (requestedTotal > product.StockQuantity)
+        {
+            return Result.Failure(ProductErrors.InsufficientStock(
+                product.Id,
+                requestedTotal,
+                product.StockQuantity));
+        }
 
         // Добавляем товар
         cart.AddItem(product.Id, product.Price, request.Quantity);

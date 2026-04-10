@@ -20,28 +20,52 @@
                 <input type="hidden" name="Order.SelectedProductIds[@i]" value="@Model.Order.SelectedProductIds[i]" />
             }
             <input type="hidden" asp-for="Order.BuyNowSingleUnit" />
+            <input type="hidden" asp-for="UseManualAddress" id="useManualAddressInput" />
+
+            @if (Model.SavedAddresses.Count > 0)
+            {
+                <div class="saved-addresses">
+                    <label asp-for="SelectedAddressId">Сохраненные адреса</label>
+                    <select asp-for="SelectedAddressId" id="savedAddressSelect">
+                        <option value="">Ввести другой адрес вручную</option>
+                        @foreach (var address in Model.SavedAddresses)
+                        {
+                            <option value="@address.Id"
+                                    data-city="@address.City"
+                                    data-street="@address.Street"
+                                    data-building="@address.Building"
+                                    data-apartment="@address.Apartment"
+                                    data-postal-code="@address.PostalCode">
+                                @(address.IsDefault ? "[Основной] " : string.Empty)@address.Summary
+                            </option>
+                        }
+                    </select>
+                    <span asp-validation-for="SelectedAddressId" class="field-error"></span>
+                </div>
+            }
+
             <div class="form-grid">
-                <div class="field">
+                <div class="field address-field">
                     <label asp-for="Order.City">Город</label>
                     <input asp-for="Order.City" />
                     <span asp-validation-for="Order.City" class="field-error"></span>
                 </div>
-                <div class="field">
+                <div class="field address-field">
                     <label asp-for="Order.Street">Улица</label>
                     <input asp-for="Order.Street" />
                     <span asp-validation-for="Order.Street" class="field-error"></span>
                 </div>
-                <div class="field">
+                <div class="field address-field">
                     <label asp-for="Order.Building">Дом</label>
                     <input asp-for="Order.Building" />
                     <span asp-validation-for="Order.Building" class="field-error"></span>
                 </div>
-                <div class="field">
+                <div class="field address-field">
                     <label asp-for="Order.Apartment">Квартира</label>
                     <input asp-for="Order.Apartment" />
                     <span asp-validation-for="Order.Apartment" class="field-error"></span>
                 </div>
-                <div class="field">
+                <div class="field address-field">
                     <label asp-for="Order.PostalCode">Индекс</label>
                     <input asp-for="Order.PostalCode" />
                     <span asp-validation-for="Order.PostalCode" class="field-error"></span>
@@ -52,6 +76,11 @@
                     <span asp-validation-for="Order.CustomerNote" class="field-error"></span>
                 </div>
             </div>
+
+            <label class="save-address" id="saveAddressWrapper">
+                <input asp-for="SaveAddressToProfile" />
+                Сохранить этот адрес в профиле
+            </label>
 
             <div class="form-actions">
                 <button type="submit" class="checkout-submit">Подтвердить заказ</button>
@@ -90,5 +119,59 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        const savedAddressSelect = document.getElementById("savedAddressSelect");
+        const useManualAddressInput = document.getElementById("useManualAddressInput");
+        const addressInputs = Array.from(document.querySelectorAll(".address-field input"));
+        const saveAddressWrapper = document.getElementById("saveAddressWrapper");
+
+        const fillAddressFromOption = (option) => {
+            if (!option) {
+                return;
+            }
+
+            const cityInput = document.getElementById("Order_City");
+            const streetInput = document.getElementById("Order_Street");
+            const buildingInput = document.getElementById("Order_Building");
+            const apartmentInput = document.getElementById("Order_Apartment");
+            const postalCodeInput = document.getElementById("Order_PostalCode");
+
+            if (cityInput) cityInput.value = option.dataset.city || "";
+            if (streetInput) streetInput.value = option.dataset.street || "";
+            if (buildingInput) buildingInput.value = option.dataset.building || "";
+            if (apartmentInput) apartmentInput.value = option.dataset.apartment || "";
+            if (postalCodeInput) postalCodeInput.value = option.dataset.postalCode || "";
+        };
+
+        const toggleAddressMode = (isManual) => {
+            if (useManualAddressInput) {
+                useManualAddressInput.value = isManual ? "true" : "false";
+            }
+
+            addressInputs.forEach((input) => {
+                input.readOnly = !isManual;
+            });
+
+            if (saveAddressWrapper) {
+                saveAddressWrapper.style.display = isManual ? "inline-flex" : "none";
+            }
+
+            if (!isManual && savedAddressSelect) {
+                const selectedOption = savedAddressSelect.options[savedAddressSelect.selectedIndex];
+                fillAddressFromOption(selectedOption);
+            }
+        };
+
+        if (savedAddressSelect) {
+            savedAddressSelect.addEventListener("change", () => {
+                const isManual = !savedAddressSelect.value;
+                toggleAddressMode(isManual);
+            });
+
+            toggleAddressMode(!savedAddressSelect.value);
+        } else {
+            toggleAddressMode(true);
+        }
+    </script>
 }
 

@@ -12,6 +12,7 @@ public class AdminProductUpdateViewModel
     public Guid CategoryId { get; set; }
     public Guid BrandId { get; set; }
     public string? Sku { get; set; }
+    public int StockQuantity { get; set; }
     public int? FilterLifespanMonths { get; set; }
     public int? FilterCapacityLiters { get; set; }
     public double? FlowRateLitersPerMinute { get; set; }

@@ -2,6 +2,7 @@ using Common.Application.Abstractions.Messaging;
 using Common.Domain.Results;
 using AquaStore.Domain.Products;
 using AquaStore.Domain.Errors;
+using AquaStore.Contracts.Products.Responses;
 
 namespace AquaStore.Application.Products.Queries;
 
@@ -36,6 +37,11 @@ internal sealed class GetProductBySlugQueryHandler : IQueryHandler<GetProductByS
             .Select(i => new ProductImageResponse(i.Id, i.Url, i.AltText, i.IsMain, i.SortOrder))
             .ToList();
 
+        var specifications = new ProductSpecificationsResponse(
+            product.FilterLifespanMonths,
+            product.FilterCapacityLiters,
+            product.FlowRateLitersPerMinute);
+
         return new ProductDetailResponse(
             product.Id,
             product.Name,
@@ -45,14 +51,14 @@ internal sealed class GetProductBySlugQueryHandler : IQueryHandler<GetProductByS
             product.Price.Amount,
             product.OldPrice?.Amount,
             product.Price.Currency,
-            product.FilterType,
+            (int)product.FilterType,
+            product.FilterType.ToString(),
             product.StockQuantity,
+            product.IsInStock,
             product.Sku,
             product.IsActive,
             product.IsFeatured,
-            product.FilterLifespanMonths,
-            product.FilterCapacityLiters,
-            product.FlowRateLitersPerMinute,
+            specifications,
             product.CategoryId,
             product.Category.Name,
             product.BrandId,

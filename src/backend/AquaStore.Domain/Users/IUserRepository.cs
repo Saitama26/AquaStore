@@ -18,6 +18,11 @@ public interface IUserRepository : IRepository<User>
     Task<bool> EmailExistsAsync(string email, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Получить пользователя по id вместе с адресами
+    /// </summary>
+    Task<User?> GetByIdWithAddressesAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Получить пользователя по refresh token
     /// </summary>
     Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);

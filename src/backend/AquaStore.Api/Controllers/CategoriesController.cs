@@ -69,6 +69,28 @@ public class CategoriesController : ApiController
     }
 
     /// <summary>
+    /// Массово создать категории (только Admin)
+    /// </summary>
+    [HttpPost("bulk")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> BulkCreateCategories([FromBody] BulkCreateCategoriesRequest request)
+    {
+        var command = new BulkCreateCategoriesCommand(
+            request.Categories
+                .Select(item => new BulkCreateCategoryItemCommand(
+                    item.Name,
+                    item.Description,
+                    item.ImageUrl))
+                .ToList());
+
+        var result = await Sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Обновить категорию (только Admin)
     /// </summary>
     [HttpPut("{id:guid}")]

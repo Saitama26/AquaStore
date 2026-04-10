@@ -23,6 +23,13 @@ public class UserRepository : Repository<User>, IUserRepository
         return await DbSet.AnyAsync(u => u.Email.Value == email, cancellationToken);
     }
 
+    public async Task<User?> GetByIdWithAddressesAsync(Guid userId, CancellationToken cancellationToken = default)
+    {
+        return await DbSet
+            .Include(u => u.Addresses)
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+    }
+
     public async Task<User?> GetByRefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
     {
         return await DbSet

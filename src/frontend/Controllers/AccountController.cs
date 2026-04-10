@@ -269,6 +269,36 @@ public class AccountController : Controller
         }
     }
 
+    [Route("/account/orders/{id:guid}/receipt/pdf")]
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> DownloadOrderReceiptPdf(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var (content, fileName, contentType) = await _apiService.DownloadOrderReceiptPdfAsync(id, cancellationToken);
+
+            if (content is null || content.Length == 0)
+            {
+                TempData["ToastMessage"] = "Не удалось сформировать PDF-чек по выбранному заказу.";
+                TempData["ToastType"] = "error";
+                return Redirect("/account/profile#orders");
+            }
+
+            return File(
+                content,
+                string.IsNullOrWhiteSpace(contentType) ? "application/pdf" : contentType,
+                string.IsNullOrWhiteSpace(fileName) ? $"aquastore-receipt-{id}.pdf" : fileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при скачивании PDF-чека заказа: {OrderId}", id);
+            TempData["ToastMessage"] = "Ошибка при скачивании PDF-чека.";
+            TempData["ToastType"] = "error";
+            return Redirect("/account/profile#orders");
+        }
+    }
+
     [Route("/account/profile/update")]
     [HttpPost]
     [Authorize]

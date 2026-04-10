@@ -7,6 +7,7 @@
     var brands = Model.Brands?.ToList() ?? new List<frontend.ViewModels.BrandViewModel>();
     var products = Model.Products?.Items?.ToList() ?? new List<frontend.ViewModels.ProductViewModel>();
     var orders = Model.Orders?.Items?.ToList() ?? new List<frontend.ViewModels.AdminOrderListItemViewModel>();
+    var analytics = Model.Analytics ?? new frontend.ViewModels.AdminOrderAnalyticsViewModel();
 
     var flattenedCategories = new List<(Guid Id, string Name)>();
     void AddCategory(frontend.ViewModels.CategoryViewModel category, string prefix)
@@ -34,7 +35,7 @@
     {
         0 => "Ожидает",
         1 => "Подтверждён",
-        2 => "В сборке",
+        2 => "В обработке",
         3 => "Отправлен",
         4 => "Доставлен",
         5 => "Отменён",
@@ -104,6 +105,11 @@
                 Заказы
                 <span class="adm-badge">@(Model.Orders?.TotalCount ?? 0)</span>
             </button>
+            <button class="adm-nav-item @(Model.ActiveTab == "analytics" ? "active" : "")" data-tab="analytics">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M3 3v18h18" stroke="currentColor" stroke-width="2"/><path d="M7 15l4-4 3 3 5-6" stroke="currentColor" stroke-width="2"/></svg>
+                Аналитика
+                <span class="adm-badge">TOP</span>
+            </button>
         </nav>
 
         <a href="/account/profile" class="adm-back-link">
@@ -119,7 +125,11 @@
         <section class="adm-tab-content @(Model.ActiveTab == "products" ? "active" : "")" id="tab-products">
             <div class="adm-section-header">
                 <h1>Товары</h1>
-                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('productAddForm')">+ Добавить товар</button>
+                <div class="adm-header-actions">
+                    <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('productAddForm')">+ Добавить товар</button>
+                    <button class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('productBulkImportForm')">Импорт JSON</button>
+                    <a href="/admin/templates/products.json" class="adm-btn adm-btn-ghost">Скачать шаблон</a>
+                </div>
             </div>
 
             <!-- Add Product Form -->
@@ -206,6 +216,23 @@
                 </form>
             </div>
 
+            <div id="productBulkImportForm" class="adm-form-panel" style="display:none;">
+                <h3>Импорт товаров из JSON</h3>
+                <form asp-controller="Admin" asp-action="ImportProductsJson" method="post" enctype="multipart/form-data">
+                    <div class="adm-form-grid">
+                        <div class="span-2">
+                            <label>JSON-файл *</label>
+                            <input type="file" name="jsonFile" accept=".json,application/json" required />
+                            <small class="adm-hint">Массив объектов: Name, Description, Price, FilterType, CategoryName, BrandName и др.</small>
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Импортировать товары</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('productBulkImportForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
             <!-- Products Table -->
             <div class="adm-table-wrap">
                 <table class="adm-table">
@@ -217,6 +244,7 @@
                             <th>Категория</th>
                             <th>Бренд</th>
                             <th>Артикул</th>
+                            <th>Остаток</th>
                             <th>Тип</th>
                             <th>Действия</th>
                         </tr>
@@ -248,10 +276,11 @@
                                     <td>@p.CategoryName</td>
                                     <td>@p.BrandName</td>
                                     <td>@(p.Sku ?? "—")</td>
+                                    <td>@(p.StockQuantity > 0 ? p.StockQuantity : "Нет")</td>
                                     <td>@FilterTypeName(p.FilterType)</td>
                                     <td class="adm-actions-cell">
                                         <button class="adm-btn-icon adm-btn-edit" title="Редактировать"
-                                                onclick="editProduct('@p.Id', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Name)', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Description ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(p.ShortDescription ?? "")', @p.Price, @(p.OldPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @p.FilterType, '@p.CategoryId', '@p.BrandId', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Sku ?? "")', @(p.Images?.Count > 0 ? "true" : "false"))">
+                                                onclick="editProduct('@p.Id', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Name)', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Description ?? "")', '@System.Web.HttpUtility.JavaScriptStringEncode(p.ShortDescription ?? "")', @p.Price, @(p.OldPrice?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "null"), @p.FilterType, '@p.CategoryId', '@p.BrandId', '@System.Web.HttpUtility.JavaScriptStringEncode(p.Sku ?? "")', @p.StockQuantity)">
                                             <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2"/></svg>
                                         </button>
                                         <form asp-controller="Admin" asp-action="DeleteProduct" method="post" class="adm-inline-form"
@@ -267,7 +296,7 @@
                         }
                         else
                         {
-                            <tr><td colspan="8" class="adm-empty">Товары не найдены</td></tr>
+                            <tr><td colspan="9" class="adm-empty">Товары не найдены</td></tr>
                         }
                     </tbody>
                 </table>
@@ -341,6 +370,10 @@
                             <input type="number" name="OldPrice" id="editProductOldPrice" min="0" step="0.01" />
                         </div>
                         <div>
+                            <label>Остаток</label>
+                            <input type="number" name="StockQuantity" id="editProductStockQuantity" min="0" value="0" />
+                        </div>
+                        <div>
                             <label>Тип фильтра</label>
                             <select name="FilterType" id="editProductFilterType">
                                 @for (int i = 0; i <= 7; i++)
@@ -392,7 +425,11 @@
         <section class="adm-tab-content @(Model.ActiveTab == "categories" ? "active" : "")" id="tab-categories">
             <div class="adm-section-header">
                 <h1>Категории</h1>
-                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('categoryAddForm')">+ Добавить категорию</button>
+                <div class="adm-header-actions">
+                    <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('categoryAddForm')">+ Добавить категорию</button>
+                    <button class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('categoryBulkImportForm')">Импорт JSON</button>
+                    <a href="/admin/templates/categories.json" class="adm-btn adm-btn-ghost">Скачать шаблон</a>
+                </div>
             </div>
 
             <!-- Add Category Form -->
@@ -426,6 +463,23 @@
                     <div class="adm-form-actions">
                         <button type="submit" class="adm-btn adm-btn-primary">Добавить</button>
                         <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('categoryAddForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="categoryBulkImportForm" class="adm-form-panel" style="display:none;">
+                <h3>Импорт категорий из JSON</h3>
+                <form asp-controller="Admin" asp-action="ImportCategoriesJson" method="post" enctype="multipart/form-data">
+                    <div class="adm-form-grid">
+                        <div class="span-2">
+                            <label>JSON-файл *</label>
+                            <input type="file" name="jsonFile" accept=".json,application/json" required />
+                            <small class="adm-hint">Массив объектов: Name, Description, ImageUrl.</small>
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Импортировать категории</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('categoryBulkImportForm')">Отмена</button>
                     </div>
                 </form>
             </div>
@@ -510,7 +564,11 @@
         <section class="adm-tab-content @(Model.ActiveTab == "brands" ? "active" : "")" id="tab-brands">
             <div class="adm-section-header">
                 <h1>Бренды</h1>
-                <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('brandAddForm')">+ Добавить бренд</button>
+                <div class="adm-header-actions">
+                    <button class="adm-btn adm-btn-primary" onclick="toggleAdmForm('brandAddForm')">+ Добавить бренд</button>
+                    <button class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('brandBulkImportForm')">Импорт JSON</button>
+                    <a href="/admin/templates/brands.json" class="adm-btn adm-btn-ghost">Скачать шаблон</a>
+                </div>
             </div>
 
             <!-- Add Brand Form -->
@@ -542,6 +600,23 @@
                     <div class="adm-form-actions">
                         <button type="submit" class="adm-btn adm-btn-primary">Добавить</button>
                         <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('brandAddForm')">Отмена</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="brandBulkImportForm" class="adm-form-panel" style="display:none;">
+                <h3>Импорт брендов из JSON</h3>
+                <form asp-controller="Admin" asp-action="ImportBrandsJson" method="post" enctype="multipart/form-data">
+                    <div class="adm-form-grid">
+                        <div class="span-2">
+                            <label>JSON-файл *</label>
+                            <input type="file" name="jsonFile" accept=".json,application/json" required />
+                            <small class="adm-hint">Массив объектов: Name, Description, Country, LogoUrl, WebsiteUrl.</small>
+                        </div>
+                    </div>
+                    <div class="adm-form-actions">
+                        <button type="submit" class="adm-btn adm-btn-primary">Импортировать бренды</button>
+                        <button type="button" class="adm-btn adm-btn-ghost" onclick="toggleAdmForm('brandBulkImportForm')">Отмена</button>
                     </div>
                 </form>
             </div>
@@ -687,8 +762,66 @@
                                     <td class="adm-nowrap">@o.TotalAmount.ToString("N2") @o.Currency</td>
                                     <td class="adm-nowrap">@o.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
                                     <td class="adm-actions-cell">
-                                        <a href="/cart/receipt/@o.Id" class="adm-btn-icon adm-btn-view" title="Подробнее">
+                                        <form asp-controller="Admin" asp-action="UpdateOrderStatus" method="post" class="adm-inline-form adm-order-status-form">
+                                            <input type="hidden" name="orderId" value="@o.Id" />
+                                            <input type="hidden" name="ordersPage" value="@Model.OrdersPage" />
+                                            <select name="status" class="adm-select-small" aria-label="Статус заказа">
+                                                @if (o.Status == 0)
+                                                {
+                                                    <option value="0" selected="selected">Ожидает</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="0">Ожидает</option>
+                                                }
+                                                @if (o.Status == 1)
+                                                {
+                                                    <option value="1" selected="selected">Подтверждён</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="1">Подтверждён</option>
+                                                }
+                                                @if (o.Status == 2)
+                                                {
+                                                    <option value="2" selected="selected">В обработке</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="2">В обработке</option>
+                                                }
+                                                @if (o.Status == 3)
+                                                {
+                                                    <option value="3" selected="selected">Отправлен</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="3">Отправлен</option>
+                                                }
+                                                @if (o.Status == 4)
+                                                {
+                                                    <option value="4" selected="selected">Доставлен</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="4">Доставлен</option>
+                                                }
+                                                @if (o.Status == 5)
+                                                {
+                                                    <option value="5" selected="selected">Отменён</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="5">Отменён</option>
+                                                }
+                                            </select>
+                                            <button type="submit" class="adm-btn adm-btn-primary adm-btn-sm">Обновить</button>
+                                        </form>
+                                        <a href="/cart/receipt/@o.Id" class="adm-btn-icon adm-btn-view" title="Открыть квитанцию">
                                             <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                        </a>
+                                        <a href="/account/orders/@o.Id/receipt/pdf" class="adm-btn-icon adm-btn-view" title="Скачать PDF чек">
+                                            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="2"/><path d="M12 18v-6" stroke="currentColor" stroke-width="2"/><path d="M9.5 14.5L12 12l2.5 2.5" stroke="currentColor" stroke-width="2"/></svg>
                                         </a>
                                     </td>
                                 </tr>
@@ -738,6 +871,221 @@
                     </div>
                 </div>
             }
+        </section>
+
+        <!-- ═══════════ ANALYTICS TAB ═══════════ -->
+        <section class="adm-tab-content @(Model.ActiveTab == "analytics" ? "active" : "")" id="tab-analytics">
+            <div class="adm-section-header">
+                <h1>Аналитика продаж и клиентов</h1>
+                <a href="/admin/analytics/export/csv" class="adm-btn adm-btn-ghost">Экспорт расширенной аналитики (CSV)</a>
+            </div>
+
+            <div class="adm-analytics-grid">
+                <article class="adm-analytics-card">
+                    <span class="adm-analytics-label">Всего заказов</span>
+                    <strong class="adm-analytics-value">@analytics.TotalOrders</strong>
+                    <span class="adm-analytics-note">Оформлено в системе</span>
+                </article>
+                <article class="adm-analytics-card">
+                    <span class="adm-analytics-label">Выручка</span>
+                    <strong class="adm-analytics-value">@analytics.TotalRevenue.ToString("N2") @analytics.Currency</strong>
+                    <span class="adm-analytics-note">Без отменённых заказов</span>
+                </article>
+                <article class="adm-analytics-card">
+                    <span class="adm-analytics-label">Средний чек</span>
+                    <strong class="adm-analytics-value">@analytics.AverageOrderValue.ToString("N2") @analytics.Currency</strong>
+                    <span class="adm-analytics-note">В среднем на заказ</span>
+                </article>
+                <article class="adm-analytics-card">
+                    <span class="adm-analytics-label">Уникальные покупатели</span>
+                    <strong class="adm-analytics-value">@analytics.UniqueCustomers</strong>
+                    <span class="adm-analytics-note">С заказами в базе</span>
+                </article>
+                <article class="adm-analytics-card">
+                    <span class="adm-analytics-label">Доставлено</span>
+                    <strong class="adm-analytics-value">@analytics.DeliveredOrders</strong>
+                    <span class="adm-analytics-note">Успешных заказов</span>
+                </article>
+                <article class="adm-analytics-card adm-analytics-card-warning">
+                    <span class="adm-analytics-label">Отменено</span>
+                    <strong class="adm-analytics-value">@analytics.CancelledOrders</strong>
+                    <span class="adm-analytics-note">Требуют анализа причин</span>
+                </article>
+            </div>
+
+            <div class="adm-analytics-section">
+                <h3>Распределение заказов по статусам</h3>
+                <div class="adm-status-bars">
+                    @foreach (var status in analytics.StatusBreakdown.OrderByDescending(x => x.Count))
+                    {
+                        <div class="adm-status-bar-row">
+                            <div class="adm-status-bar-header">
+                                <span>@StatusName(status.Status)</span>
+                                <span>@status.Count шт. • @status.SharePercent.ToString("N2")%</span>
+                            </div>
+                            <div class="adm-status-bar-track">
+                                <div class="adm-status-bar-fill @StatusClass(status.Status)" style="width:@Math.Min(status.SharePercent, 100m).ToString(System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="adm-analytics-columns">
+                <div class="adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th colspan="5">Топ товаров по количеству</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Товар</th>
+                                <th>Продано</th>
+                                <th>Выручка</th>
+                                <th>Заказов</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (analytics.TopProductsByQuantity.Any())
+                        {
+                            @for (var i = 0; i < analytics.TopProductsByQuantity.Count; i++)
+                            {
+                                var item = analytics.TopProductsByQuantity[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td><strong>@item.ProductName</strong></td>
+                                    <td>@item.UnitsSold</td>
+                                    <td>@item.Revenue.ToString("N2") @analytics.Currency</td>
+                                    <td>@item.OrdersCount</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="adm-empty">Недостаточно данных</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th colspan="5">Топ товаров по выручке</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Товар</th>
+                                <th>Выручка</th>
+                                <th>Продано</th>
+                                <th>Заказов</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (analytics.TopProductsByRevenue.Any())
+                        {
+                            @for (var i = 0; i < analytics.TopProductsByRevenue.Count; i++)
+                            {
+                                var item = analytics.TopProductsByRevenue[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td><strong>@item.ProductName</strong></td>
+                                    <td>@item.Revenue.ToString("N2") @analytics.Currency</td>
+                                    <td>@item.UnitsSold</td>
+                                    <td>@item.OrdersCount</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="adm-empty">Недостаточно данных</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="adm-analytics-columns">
+                <div class="adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th colspan="6">Топ пользователей по сумме покупок</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Пользователь</th>
+                                <th>Email</th>
+                                <th>Заказов</th>
+                                <th>Потрачено</th>
+                                <th>Средний чек</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (analytics.TopUsersBySpend.Any())
+                        {
+                            @for (var i = 0; i < analytics.TopUsersBySpend.Count; i++)
+                            {
+                                var item = analytics.TopUsersBySpend[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td><strong>@item.UserName</strong></td>
+                                    <td>@item.UserEmail</td>
+                                    <td>@item.OrdersCount</td>
+                                    <td>@item.TotalSpent.ToString("N2") @analytics.Currency</td>
+                                    <td>@item.AverageOrderValue.ToString("N2") @analytics.Currency</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="adm-empty">Недостаточно данных</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="adm-table-wrap">
+                    <table class="adm-table">
+                        <thead>
+                            <tr>
+                                <th colspan="6">Топ пользователей по числу заказов</th>
+                            </tr>
+                            <tr>
+                                <th>#</th>
+                                <th>Пользователь</th>
+                                <th>Email</th>
+                                <th>Заказов</th>
+                                <th>Потрачено</th>
+                                <th>Средний чек</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @if (analytics.TopUsersByOrdersCount.Any())
+                        {
+                            @for (var i = 0; i < analytics.TopUsersByOrdersCount.Count; i++)
+                            {
+                                var item = analytics.TopUsersByOrdersCount[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <td><strong>@item.UserName</strong></td>
+                                    <td>@item.UserEmail</td>
+                                    <td>@item.OrdersCount</td>
+                                    <td>@item.TotalSpent.ToString("N2") @analytics.Currency</td>
+                                    <td>@item.AverageOrderValue.ToString("N2") @analytics.Currency</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="6" class="adm-empty">Недостаточно данных</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
         <!-- ═══════════ USERS TAB ═══════════ -->
@@ -841,7 +1189,7 @@
     }
 
     // ───── Edit Product ─────
-    function editProduct(id, name, desc, shortDesc, price, oldPrice, filterType, categoryId, brandId, sku) {
+    function editProduct(id, name, desc, shortDesc, price, oldPrice, filterType, categoryId, brandId, sku, stockQuantity) {
         document.getElementById('editProductId').value = id;
         document.getElementById('editProductName').value = name;
         document.getElementById('editProductDescription').value = desc;
@@ -852,6 +1200,7 @@
         document.getElementById('editProductCategoryId').value = categoryId;
         document.getElementById('editProductBrandId').value = brandId;
         document.getElementById('editProductSku').value = sku;
+        document.getElementById('editProductStockQuantity').value = stockQuantity ?? 0;
         const form = document.getElementById('productEditForm');
         form.style.display = 'block';
         form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

@@ -23,6 +23,23 @@ public class UserProfileViewModel
     public string? Phone { get; set; }
     public string Role { get; set; } = string.Empty;
     public bool EmailConfirmed { get; set; }
+    public List<UserAddressViewModel> Addresses { get; set; } = new();
     public DateTime CreatedAt { get; set; }
+}
+
+public class UserAddressViewModel
+{
+    public Guid Id { get; set; }
+    public string City { get; set; } = string.Empty;
+    public string Street { get; set; } = string.Empty;
+    public string Building { get; set; } = string.Empty;
+    public string? Apartment { get; set; }
+    public string PostalCode { get; set; } = string.Empty;
+    public bool IsDefault { get; set; }
+
+    public string Summary
+        => string.IsNullOrWhiteSpace(Apartment)
+            ? $"{PostalCode}, {City}, {Street}, {Building}"
+            : $"{PostalCode}, {City}, {Street}, {Building}, кв. {Apartment}";
 }
 

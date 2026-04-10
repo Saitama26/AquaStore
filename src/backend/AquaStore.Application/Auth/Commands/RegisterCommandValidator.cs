@@ -32,8 +32,8 @@ public sealed class RegisterCommandValidator : AbstractValidator<RegisterCommand
             .MaximumLength(100).WithMessage("Фамилия не более 100 символов");
 
         RuleFor(x => x.Phone)
-            .Matches(@"^[\d\+\-\(\)\s]*$").WithMessage("Некорректный формат телефона")
-            .When(x => !string.IsNullOrEmpty(x.Phone));
+            .NotEmpty().WithMessage("Укажите телефон")
+            .Matches(@"^[\d\+\-\(\)\s]*$").WithMessage("Некорректный формат телефона");
     }
 }
 

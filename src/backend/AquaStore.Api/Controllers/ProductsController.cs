@@ -110,6 +110,41 @@ public class ProductsController : ApiController
     }
 
     /// <summary>
+    /// Массово создать товары (только Admin)
+    /// </summary>
+    [HttpPost("bulk")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> BulkCreateProducts([FromBody] BulkCreateProductsRequest request)
+    {
+        var command = new BulkCreateProductsCommand(
+            request.Products
+                .Select(item => new BulkCreateProductItemCommand(
+                    item.Name,
+                    item.Description,
+                    item.ShortDescription,
+                    item.Price,
+                    item.OldPrice,
+                    item.FilterType,
+                    item.CategoryName,
+                    item.BrandName,
+                    item.StockQuantity,
+                    item.Sku,
+                    item.FilterLifespanMonths,
+                    item.FilterCapacityLiters,
+                    item.FlowRateLitersPerMinute,
+                    item.ImageUrls))
+                .ToList());
+
+        var result = await Sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Обновить товар (только Admin)
     /// </summary>
     [HttpPut("{id:guid}")]

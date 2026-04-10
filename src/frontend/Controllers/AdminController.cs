@@ -2,12 +2,23 @@ using frontend.Services;
 using frontend.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace frontend.Controllers;
 
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+    private static readonly JsonSerializerOptions JsonTemplateOptions = new()
+    {
+        WriteIndented = true
+    };
+
     private readonly IApiService _apiService;
     private readonly ILogger<AdminController> _logger;
 
@@ -42,8 +53,9 @@ public class AdminController : Controller
         var brandsTask = _apiService.GetBrandsAsync(cancellationToken);
         var ordersTask = _apiService.GetAllOrdersAsync(ordersPage, pageSize, cancellationToken);
         var usersTask = _apiService.GetUsersAsync(1, pageSize, cancellationToken);
+        var analyticsTask = _apiService.GetOrderAnalyticsAsync(10, 10, cancellationToken);
 
-        await Task.WhenAll(productsTask, categoriesTask, brandsTask, ordersTask, usersTask);
+        await Task.WhenAll(productsTask, categoriesTask, brandsTask, ordersTask, usersTask, analyticsTask);
 
         model.Products = await productsTask ?? new PagedResponse<ProductViewModel>();
         model.Categories = (await categoriesTask) ?? Array.Empty<CategoryViewModel>();
@@ -51,6 +63,7 @@ public class AdminController : Controller
         model.Orders = await ordersTask;
         var usersResponse = await usersTask;
         model.Users = usersResponse?.Items ?? new List<AdminUserViewModel>();
+        model.Analytics = await analyticsTask ?? new AdminOrderAnalyticsViewModel();
 
         return View(model);
     }
@@ -70,6 +83,24 @@ public class AdminController : Controller
 
         var success = await _apiService.CreateCategoryAsync(model, ct);
         TempData["ToastMessage"] = success ? "Категория добавлена." : "Не удалось добавить категорию.";
+        TempData["ToastType"] = success ? "success" : "error";
+        return RedirectToAction("Index", new { tab = "categories" });
+    }
+
+    [HttpPost("/admin/category/import-json")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportCategoriesJson(IFormFile? jsonFile, CancellationToken ct)
+    {
+        var items = await ParseJsonArrayFromUploadAsync<AdminBulkCategoryImportItemViewModel>(jsonFile, ct, "категорий");
+        if (items is null)
+        {
+            return RedirectToAction("Index", new { tab = "categories" });
+        }
+
+        var success = await _apiService.BulkImportCategoriesAsync(items, ct);
+        TempData["ToastMessage"] = success
+            ? $"Импорт категорий завершен. Обработано: {items.Count}."
+            : "Не удалось импортировать категории.";
         TempData["ToastType"] = success ? "success" : "error";
         return RedirectToAction("Index", new { tab = "categories" });
     }
@@ -123,6 +154,24 @@ public class AdminController : Controller
 
         var success = await _apiService.CreateBrandAsync(model, ct);
         TempData["ToastMessage"] = success ? "Бренд добавлен." : "Не удалось добавить бренд.";
+        TempData["ToastType"] = success ? "success" : "error";
+        return RedirectToAction("Index", new { tab = "brands" });
+    }
+
+    [HttpPost("/admin/brand/import-json")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportBrandsJson(IFormFile? jsonFile, CancellationToken ct)
+    {
+        var items = await ParseJsonArrayFromUploadAsync<AdminBulkBrandImportItemViewModel>(jsonFile, ct, "брендов");
+        if (items is null)
+        {
+            return RedirectToAction("Index", new { tab = "brands" });
+        }
+
+        var success = await _apiService.BulkImportBrandsAsync(items, ct);
+        TempData["ToastMessage"] = success
+            ? $"Импорт брендов завершен. Обработано: {items.Count}."
+            : "Не удалось импортировать бренды.";
         TempData["ToastType"] = success ? "success" : "error";
         return RedirectToAction("Index", new { tab = "brands" });
     }
@@ -191,9 +240,24 @@ public class AdminController : Controller
             return RedirectToAction("Index", new { tab = "products" });
         }
 
-        var success = await _apiService.UpdateProductAsync(model, ct);
-        TempData["ToastMessage"] = success ? "Товар обновлен." : "Не удалось обновить товар.";
-        TempData["ToastType"] = success ? "success" : "error";
+        var productUpdated = await _apiService.UpdateProductAsync(model, ct);
+        var stockUpdated = productUpdated && await _apiService.UpdateProductStockAsync(model.ProductId, model.StockQuantity, ct);
+
+        if (productUpdated && stockUpdated)
+        {
+            TempData["ToastMessage"] = "Товар обновлен.";
+            TempData["ToastType"] = "success";
+        }
+        else if (productUpdated)
+        {
+            TempData["ToastMessage"] = "Товар обновлен, но остаток не обновлен.";
+            TempData["ToastType"] = "warning";
+        }
+        else
+        {
+            TempData["ToastMessage"] = "Не удалось обновить товар.";
+            TempData["ToastType"] = "error";
+        }
         return RedirectToAction("Index", new { tab = "products" });
     }
 
@@ -212,6 +276,106 @@ public class AdminController : Controller
         TempData["ToastMessage"] = success ? "Товар удален." : "Не удалось удалить товар.";
         TempData["ToastType"] = success ? "success" : "error";
         return RedirectToAction("Index", new { tab = "products" });
+    }
+
+    [HttpPost("/admin/product/import-json")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ImportProductsJson(IFormFile? jsonFile, CancellationToken ct)
+    {
+        var items = await ParseJsonArrayFromUploadAsync<AdminBulkProductImportItemViewModel>(jsonFile, ct, "товаров");
+        if (items is null)
+        {
+            return RedirectToAction("Index", new { tab = "products" });
+        }
+
+        var success = await _apiService.BulkImportProductsAsync(items, ct);
+        TempData["ToastMessage"] = success
+            ? $"Импорт товаров завершен. Обработано: {items.Count}."
+            : "Не удалось импортировать товары.";
+        TempData["ToastType"] = success ? "success" : "error";
+        return RedirectToAction("Index", new { tab = "products" });
+    }
+
+    [HttpGet("/admin/templates/products.json")]
+    public IActionResult DownloadProductsTemplate()
+    {
+        var template = new[]
+        {
+            new
+            {
+                name = "Фильтр Aqua X1",
+                description = "Полное описание товара",
+                shortDescription = "Краткое описание",
+                price = 199.99m,
+                oldPrice = 249.99m,
+                filterType = 0,
+                categoryName = "Проточные фильтры",
+                brandName = "AquaPro",
+                stockQuantity = 25,
+                sku = "AQX1-001",
+                filterLifespanMonths = 12,
+                filterCapacityLiters = 4000,
+                flowRateLitersPerMinute = 2.5,
+                imageUrls = new[]
+                {
+                    "https://example.com/images/filter-x1-main.jpg",
+                    "https://example.com/images/filter-x1-side.jpg"
+                }
+            }
+        };
+
+        return BuildJsonTemplateFile(template, "products-import-template.json");
+    }
+
+    [HttpGet("/admin/templates/categories.json")]
+    public IActionResult DownloadCategoriesTemplate()
+    {
+        var template = new[]
+        {
+            new
+            {
+                name = "Проточные фильтры",
+                description = "Категория для фильтров проточного типа",
+                imageUrl = "https://example.com/images/categories/flow-filters.jpg"
+            }
+        };
+
+        return BuildJsonTemplateFile(template, "categories-import-template.json");
+    }
+
+    [HttpGet("/admin/templates/brands.json")]
+    public IActionResult DownloadBrandsTemplate()
+    {
+        var template = new[]
+        {
+            new
+            {
+                name = "AquaPro",
+                description = "Производитель систем очистки воды",
+                country = "Беларусь",
+                logoUrl = "https://example.com/images/brands/aquapro-logo.png",
+                websiteUrl = "https://aquapro.example"
+            }
+        };
+
+        return BuildJsonTemplateFile(template, "brands-import-template.json");
+    }
+
+    [HttpPost("/admin/order/status/update")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateOrderStatus(Guid orderId, int status, int ordersPage, CancellationToken ct)
+    {
+        if (orderId == Guid.Empty)
+        {
+            TempData["ToastMessage"] = "Укажите заказ.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("Index", new { tab = "orders", ordersPage = ordersPage < 1 ? 1 : ordersPage });
+        }
+
+        var success = await _apiService.UpdateOrderStatusAsync(orderId, status, ct);
+        TempData["ToastMessage"] = success ? "Статус заказа обновлён." : "Не удалось обновить статус заказа.";
+        TempData["ToastType"] = success ? "success" : "error";
+        return RedirectToAction("Index", new { tab = "orders", ordersPage = ordersPage < 1 ? 1 : ordersPage });
     }
 
     // ───── Users (admin) ─────
@@ -244,5 +408,71 @@ public class AdminController : Controller
             content,
             string.IsNullOrWhiteSpace(contentType) ? "text/csv" : contentType,
             string.IsNullOrWhiteSpace(fileName) ? $"orders-stat-{DateTime.UtcNow:yyyyMMdd-HHmmss}.csv" : fileName);
+    }
+
+    [HttpGet("/admin/analytics/export/csv")]
+    public async Task<IActionResult> ExportAnalyticsCsv(CancellationToken ct)
+    {
+        var (content, fileName, contentType) = await _apiService.ExportOrderAnalyticsCsvAsync(ct);
+
+        if (content is null || content.Length == 0)
+        {
+            TempData["ToastMessage"] = "Не удалось получить файл расширенной аналитики.";
+            TempData["ToastType"] = "error";
+            return RedirectToAction("Index", new { tab = "analytics" });
+        }
+
+        return File(
+            content,
+            string.IsNullOrWhiteSpace(contentType) ? "text/csv" : contentType,
+            string.IsNullOrWhiteSpace(fileName) ? $"analytics-stat-{DateTime.UtcNow:yyyyMMdd-HHmmss}.csv" : fileName);
+    }
+
+    private async Task<List<T>?> ParseJsonArrayFromUploadAsync<T>(IFormFile? jsonFile, CancellationToken ct, string entityName)
+    {
+        if (jsonFile is null || jsonFile.Length == 0)
+        {
+            TempData["ToastMessage"] = "Выберите JSON-файл для импорта.";
+            TempData["ToastType"] = "error";
+            return null;
+        }
+
+        if (!string.Equals(Path.GetExtension(jsonFile.FileName), ".json", StringComparison.OrdinalIgnoreCase))
+        {
+            TempData["ToastMessage"] = "Поддерживаются только файлы .json";
+            TempData["ToastType"] = "error";
+            return null;
+        }
+
+        try
+        {
+            await using var stream = jsonFile.OpenReadStream();
+            var items = await JsonSerializer.DeserializeAsync<List<T>>(stream, JsonOptions, ct);
+
+            if (items is null || items.Count == 0)
+            {
+                TempData["ToastMessage"] = $"JSON-файл {entityName} пуст или имеет неверный формат.";
+                TempData["ToastType"] = "error";
+                return null;
+            }
+
+            return items;
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Некорректный JSON при импорте {EntityName}", entityName);
+            TempData["ToastMessage"] = $"Некорректный JSON для импорта {entityName}.";
+            TempData["ToastType"] = "error";
+            return null;
+        }
+    }
+
+    private static FileContentResult BuildJsonTemplateFile<T>(T template, string fileName)
+    {
+        var bytes = JsonSerializer.SerializeToUtf8Bytes(template, JsonTemplateOptions);
+        return new FileContentResult(bytes, "application/json")
+        {
+            FileDownloadName = fileName
+        };
     }
 }

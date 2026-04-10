@@ -1,8 +1,8 @@
 using Common.Application.Abstractions.Messaging;
 using Common.Domain.Results;
 using AquaStore.Domain.Products;
-using AquaStore.Domain.Enums;
 using AquaStore.Domain.Errors;
+using AquaStore.Contracts.Products.Responses;
 
 namespace AquaStore.Application.Products.Queries;
 
@@ -10,39 +10,6 @@ namespace AquaStore.Application.Products.Queries;
 /// Запрос на получение товара по ID
 /// </summary>
 public sealed record GetProductByIdQuery(Guid ProductId) : IQuery<ProductDetailResponse>;
-
-public sealed record ProductDetailResponse(
-    Guid Id,
-    string Name,
-    string Slug,
-    string Description,
-    string? ShortDescription,
-    decimal Price,
-    decimal? OldPrice,
-    string Currency,
-    FilterType FilterType,
-    int StockQuantity,
-    string? Sku,
-    bool IsActive,
-    bool IsFeatured,
-    int? FilterLifespanMonths,
-    int? FilterCapacityLiters,
-    double? FlowRateLitersPerMinute,
-    Guid CategoryId,
-    string CategoryName,
-    Guid BrandId,
-    string BrandName,
-    IReadOnlyList<ProductImageResponse> Images,
-    double? AverageRating,
-    int ReviewCount,
-    DateTime CreatedAt);
-
-public sealed record ProductImageResponse(
-    Guid Id,
-    string Url,
-    string? AltText,
-    bool IsMain,
-    int SortOrder);
 
 internal sealed class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQuery, ProductDetailResponse>
 {
@@ -70,6 +37,11 @@ internal sealed class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQ
             .Select(i => new ProductImageResponse(i.Id, i.Url, i.AltText, i.IsMain, i.SortOrder))
             .ToList();
 
+        var specifications = new ProductSpecificationsResponse(
+            product.FilterLifespanMonths,
+            product.FilterCapacityLiters,
+            product.FlowRateLitersPerMinute);
+
         return new ProductDetailResponse(
             product.Id,
             product.Name,
@@ -79,14 +51,14 @@ internal sealed class GetProductByIdQueryHandler : IQueryHandler<GetProductByIdQ
             product.Price.Amount,
             product.OldPrice?.Amount,
             product.Price.Currency,
-            product.FilterType,
+            (int)product.FilterType,
+            product.FilterType.ToString(),
             product.StockQuantity,
+            product.IsInStock,
             product.Sku,
             product.IsActive,
             product.IsFeatured,
-            product.FilterLifespanMonths,
-            product.FilterCapacityLiters,
-            product.FlowRateLitersPerMinute,
+            specifications,
             product.CategoryId,
             product.Category.Name,
             product.BrandId,

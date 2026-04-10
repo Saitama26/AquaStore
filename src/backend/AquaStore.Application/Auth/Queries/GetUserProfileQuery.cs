@@ -18,7 +18,18 @@ public sealed record UserProfileResponse(
     string LastName,
     string? Phone,
     string Role,
+    bool EmailConfirmed,
+    IReadOnlyList<UserAddressResponse> Addresses,
     DateTime CreatedAt);
+
+public sealed record UserAddressResponse(
+    Guid Id,
+    string City,
+    string Street,
+    string Building,
+    string? Apartment,
+    string PostalCode,
+    bool IsDefault);
 
 internal sealed class GetUserProfileQueryHandler : IQueryHandler<GetUserProfileQuery, UserProfileResponse>
 {
@@ -42,12 +53,25 @@ internal sealed class GetUserProfileQueryHandler : IQueryHandler<GetUserProfileQ
             return UserErrors.InvalidCredentials;
         }
 
-        var user = await _userRepository.GetByIdAsync(_currentUserService.UserId.Value, cancellationToken);
+        var user = await _userRepository.GetByIdWithAddressesAsync(_currentUserService.UserId.Value, cancellationToken);
 
         if (user is null)
         {
             return UserErrors.NotFound(_currentUserService.UserId.Value);
         }
+
+        var addresses = user.Addresses
+            .OrderByDescending(a => a.IsDefault)
+            .ThenBy(a => a.Id)
+            .Select(a => new UserAddressResponse(
+                a.Id,
+                a.Address.City,
+                a.Address.Street,
+                a.Address.Building,
+                a.Address.Apartment,
+                a.Address.PostalCode,
+                a.IsDefault))
+            .ToList();
 
         return new UserProfileResponse(
             user.Id,
@@ -56,6 +80,8 @@ internal sealed class GetUserProfileQueryHandler : IQueryHandler<GetUserProfileQ
             user.LastName,
             user.Phone?.ToString(),
             user.Role.ToString(),
+            user.EmailConfirmed,
+            addresses,
             user.CreatedAtUtc);
     }
 }

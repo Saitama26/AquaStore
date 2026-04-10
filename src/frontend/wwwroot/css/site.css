@@ -460,6 +460,29 @@ body.nav-locked {
   gap: 8px;
 }
 
+.cart-button {
+  position: relative;
+}
+
+.cart-button-count {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ff6b6b;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.cart-button-count.is-hidden {
+  display: none;
+}
+
 .icon-link svg {
   width: 18px;
   height: 18px;

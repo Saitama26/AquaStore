@@ -15,6 +15,7 @@ public sealed record ProductDetailResponse(
     int FilterType,
     string FilterTypeName,
     int StockQuantity,
+    bool IsInStock,
     string? Sku,
     bool IsActive,
     bool IsFeatured,

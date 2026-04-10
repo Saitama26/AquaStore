@@ -54,6 +54,30 @@ public class BrandsController : ApiController
     }
 
     /// <summary>
+    /// Массово создать бренды (только Admin)
+    /// </summary>
+    [HttpPost("bulk")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> BulkCreateBrands([FromBody] BulkCreateBrandsRequest request)
+    {
+        var command = new BulkCreateBrandsCommand(
+            request.Brands
+                .Select(item => new BulkCreateBrandItemCommand(
+                    item.Name,
+                    item.Description,
+                    item.Country,
+                    item.LogoUrl,
+                    item.WebsiteUrl))
+                .ToList());
+
+        var result = await Sender.Send(command);
+
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Обновить бренд (только Admin)
     /// </summary>
     [HttpPut("{id:guid}")]

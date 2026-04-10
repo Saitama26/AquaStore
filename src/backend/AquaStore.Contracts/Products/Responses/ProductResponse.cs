@@ -15,6 +15,7 @@ public sealed record ProductResponse(
     string BrandName,
     int FilterType,
     string FilterTypeName,
+    int StockQuantity,
     bool IsInStock,
     bool IsFeatured,
     double? AverageRating,

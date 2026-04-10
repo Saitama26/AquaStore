@@ -34,6 +34,10 @@ public sealed class CheckoutViewModel
 {
     public CartViewModel Cart { get; set; } = new();
     public CreateOrderViewModel Order { get; set; } = new();
+    public List<UserAddressViewModel> SavedAddresses { get; set; } = new();
+    public Guid? SelectedAddressId { get; set; }
+    public bool UseManualAddress { get; set; } = true;
+    public bool SaveAddressToProfile { get; set; }
 }
 
 public sealed class CreateOrderResponseViewModel

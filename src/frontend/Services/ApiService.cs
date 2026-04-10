@@ -231,6 +231,115 @@ public class ApiService : IApiService
         }
     }
 
+    public async Task<bool> BulkImportCategoriesAsync(
+        IReadOnlyList<AdminBulkCategoryImportItemViewModel> categories,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                categories = categories.Select(c => new
+                {
+                    name = c.Name,
+                    description = c.Description,
+                    imageUrl = c.ImageUrl
+                }).ToList()
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/categories/bulk")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при массовом импорте категорий");
+            return false;
+        }
+    }
+
+    public async Task<bool> BulkImportBrandsAsync(
+        IReadOnlyList<AdminBulkBrandImportItemViewModel> brands,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                brands = brands.Select(b => new
+                {
+                    name = b.Name,
+                    description = b.Description,
+                    country = b.Country,
+                    logoUrl = b.LogoUrl,
+                    websiteUrl = b.WebsiteUrl
+                }).ToList()
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/brands/bulk")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при массовом импорте брендов");
+            return false;
+        }
+    }
+
+    public async Task<bool> BulkImportProductsAsync(
+        IReadOnlyList<AdminBulkProductImportItemViewModel> products,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                products = products.Select(p => new
+                {
+                    name = p.Name,
+                    description = p.Description,
+                    shortDescription = p.ShortDescription,
+                    price = p.Price,
+                    oldPrice = p.OldPrice,
+                    filterType = p.FilterType,
+                    categoryName = p.CategoryName,
+                    brandName = p.BrandName,
+                    stockQuantity = p.StockQuantity,
+                    sku = p.Sku,
+                    filterLifespanMonths = p.FilterLifespanMonths,
+                    filterCapacityLiters = p.FilterCapacityLiters,
+                    flowRateLitersPerMinute = p.FlowRateLitersPerMinute,
+                    imageUrls = p.ImageUrls
+                }).ToList()
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/products/bulk")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при массовом импорте товаров");
+            return false;
+        }
+    }
+
     public async Task<bool> DeleteBrandAsync(Guid brandId, CancellationToken cancellationToken = default)
     {
         try
@@ -362,9 +471,15 @@ public class ApiService : IApiService
 
     public async Task<bool> CreateProductAsync(AdminProductCreateViewModel model, CancellationToken cancellationToken = default)
     {
+        if (model is null)
+        {
+            _logger.LogWarning("Не удалось создать товар: модель формы равна null.");
+            return false;
+        }
+
         try
         {
-            var imageUrls = model.ImageUrls
+            var imageUrls = (model.ImageUrls ?? string.Empty)
                 .Split(new[] { '\r', '\n', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(url => url.Trim())
                 .Where(url => !string.IsNullOrWhiteSpace(url))
@@ -506,7 +621,7 @@ public class ApiService : IApiService
     }
 
     // Cart
-    public async Task<bool> AddToCartAsync(Guid productId, int quantity = 1, CancellationToken cancellationToken = default)
+    public async Task<ApiOperationResult> AddToCartAsync(Guid productId, int quantity = 1, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -517,16 +632,72 @@ public class ApiService : IApiService
             };
             AddAuthHeader(httpRequest);
             var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            
-            // API возвращает ApiResponse
-            var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<object>>(_jsonOptions, cancellationToken);
-            return apiResponse?.Success == true;
+            ApiResponse<object>? apiResponse = null;
+            if (response.Content.Headers.ContentLength is > 0)
+            {
+                apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<object>>(_jsonOptions, cancellationToken);
+            }
+
+            return new ApiOperationResult(
+                response.IsSuccessStatusCode,
+                apiResponse?.Message ?? (response.IsSuccessStatusCode ? null : "Не удалось добавить товар в корзину."),
+                apiResponse?.Errors);
         }
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Ошибка при добавлении товара в корзину: {ProductId}", productId);
+            return ApiOperationResult.Fail("Ошибка сети при добавлении товара в корзину.");
+        }
+    }
+
+    public async Task<bool> UpdateProductStockAsync(Guid productId, int quantity, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new { quantity };
+            using var request = new HttpRequestMessage(HttpMethod.Patch, $"{_settings.BaseUrl}/api/products/{productId}/stock")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при обновлении остатка товара: {ProductId}", productId);
             return false;
+        }
+    }
+
+    public async Task<ApiOperationResult> UpdateCartItemQuantityAsync(Guid productId, int quantity, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new { Quantity = quantity };
+            var httpRequest = new HttpRequestMessage(HttpMethod.Put, $"{_settings.BaseUrl}/api/cart/items/{productId}")
+            {
+                Content = JsonContent.Create(request)
+            };
+            AddAuthHeader(httpRequest);
+
+            var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+            ApiResponse<object>? apiResponse = null;
+            if (response.Content.Headers.ContentLength is > 0)
+            {
+                apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<object>>(_jsonOptions, cancellationToken);
+            }
+
+            return new ApiOperationResult(
+                response.IsSuccessStatusCode,
+                apiResponse?.Message ?? (response.IsSuccessStatusCode ? null : "Не удалось обновить количество товара."),
+                apiResponse?.Errors);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при обновлении количества товара в корзине: {ProductId}", productId);
+            return ApiOperationResult.Fail("Ошибка сети при обновлении количества товара.");
         }
     }
 
@@ -682,6 +853,30 @@ public class ApiService : IApiService
         }
     }
 
+    public async Task<bool> UpdateOrderStatusAsync(
+        Guid orderId,
+        int status,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new { status };
+            using var request = new HttpRequestMessage(HttpMethod.Patch, $"{_settings.BaseUrl}/api/orders/{orderId}/status")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            return response.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при обновлении статуса заказа: {OrderId}", orderId);
+            return false;
+        }
+    }
+
     public async Task<OrderDetailViewModel?> GetOrderByIdAsync(Guid orderId, CancellationToken cancellationToken = default)
     {
         try
@@ -699,6 +894,74 @@ public class ApiService : IApiService
         catch (HttpRequestException ex)
         {
             _logger.LogError(ex, "Ошибка при получении заказа: {OrderId}", orderId);
+            return null;
+        }
+    }
+
+    public async Task<(byte[]? Content, string? FileName, string? ContentType)> DownloadOrderReceiptPdfAsync(
+        Guid orderId,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"{_settings.BaseUrl}/api/orders/{orderId}/receipt/pdf");
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Не удалось скачать PDF-чек заказа {OrderId}. StatusCode: {StatusCode}", orderId, response.StatusCode);
+                return (null, null, null);
+            }
+
+            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/pdf";
+            var contentDisposition = response.Content.Headers.ContentDisposition;
+            var fileName = contentDisposition?.FileNameStar ?? contentDisposition?.FileName;
+
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = fileName.Trim('"');
+            }
+
+            return (bytes, fileName, contentType);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogError(ex, "Ошибка при скачивании PDF-чека заказа: {OrderId}", orderId);
+            return (null, null, null);
+        }
+    }
+
+    public async Task<AdminOrderAnalyticsViewModel?> GetOrderAnalyticsAsync(
+        int topProducts = 10,
+        int topUsers = 10,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"{_settings.BaseUrl}/api/orders/analytics?topProducts={topProducts}&topUsers={topUsers}");
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var apiResponse = await response.Content
+                .ReadFromJsonAsync<ApiResponse<AdminOrderAnalyticsViewModel>>(_jsonOptions, cancellationToken);
+
+            return apiResponse?.Success == true ? apiResponse.Data : null;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при получении аналитики заказов");
             return null;
         }
     }
@@ -743,6 +1006,46 @@ public class ApiService : IApiService
         }
     }
 
+    public async Task<(byte[]? Content, string? FileName, string? ContentType)> ExportOrderAnalyticsCsvAsync(
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"{_settings.BaseUrl}/api/orders/analytics/export/csv");
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Не удалось экспортировать расширенную аналитику в CSV. StatusCode: {StatusCode}", response.StatusCode);
+                return (null, null, null);
+            }
+
+            var bytes = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+            var contentType = response.Content.Headers.ContentType?.MediaType ?? "text/csv";
+            var contentDisposition = response.Content.Headers.ContentDisposition;
+            var fileName = contentDisposition?.FileNameStar ?? contentDisposition?.FileName;
+
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                fileName = fileName.Trim('"');
+            }
+
+            return (bytes, fileName, contentType);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            _logger.LogError(ex, "Ошибка при экспорте расширенной аналитики в CSV");
+            return (null, null, null);
+        }
+    }
+
     // Auth
     public async Task<AuthResponseViewModel?> LoginAsync(string email, string password, CancellationToken cancellationToken = default)
     {
@@ -773,7 +1076,7 @@ public class ApiService : IApiService
         string confirmPassword,
         string firstName,
         string lastName,
-        string? phone,
+        string phone,
         CancellationToken cancellationToken = default)
     {
         try
@@ -845,6 +1148,42 @@ public class ApiService : IApiService
         {
             _logger.LogError(ex, "Ошибка при получении профиля");
             return null;
+        }
+    }
+
+    public async Task<ApiOperationResult> AddAddressAsync(AddAddressViewModel model, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var payload = new
+            {
+                city = model.City,
+                street = model.Street,
+                building = model.Building,
+                apartment = model.Apartment,
+                postalCode = model.PostalCode,
+                isDefault = model.IsDefault
+            };
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.BaseUrl}/api/auth/profile/addresses")
+            {
+                Content = JsonContent.Create(payload)
+            };
+            AddAuthHeader(request);
+
+            var response = await _httpClient.SendAsync(request, cancellationToken);
+            var apiResponse = await response.Content
+                .ReadFromJsonAsync<ApiResponse<object>>(_jsonOptions, cancellationToken);
+
+            return new ApiOperationResult(
+                response.IsSuccessStatusCode,
+                apiResponse?.Message,
+                apiResponse?.Errors);
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Ошибка при добавлении адреса пользователя");
+            return ApiOperationResult.Fail("Ошибка сети при добавлении адреса.");
         }
     }
 

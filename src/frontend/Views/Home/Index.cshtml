@@ -43,6 +43,7 @@
     };
 
     var rootCategories = Model.Categories.Where(c => c.ParentCategoryId == null).OrderBy(c => c.Name).ToList();
+    var spotlightCategoryNames = rootCategories.Select(c => c.Name).Take(5).ToList();
 }
 
 @section Styles {
@@ -53,6 +54,10 @@
 <section class="hero">
     <div class="hero-content">
         <div class="hero-text">
+            <div class="hero-kicker">
+                <span class="hero-kicker-dot"></span>
+                Подбор фильтра за 60 секунд
+            </div>
             <h1 class="hero-title">
                 <span class="hero-accent">Чистая вода</span>
                 для вашего дома
@@ -61,6 +66,16 @@
                 Фильтры для воды от ведущих производителей. 
                 Подберём идеальное решение для вашей квартиры или дома — от кувшинов до систем обратного осмоса.
             </p>
+            <div class="hero-trust-row">
+                <span class="hero-trust-pill">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L4 6v6c0 5.5 3.8 9.7 8 10 4.2-.3 8-4.5 8-10V6l-8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+                    Проверенная сертификация
+                </span>
+                <span class="hero-trust-pill">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18"/><path d="M12 3v18"/></svg>
+                    200+ конфигураций под задачу
+                </span>
+            </div>
             <div class="hero-stats">
                 <div class="hero-stat">
                     <span class="hero-stat-number">@Model.TotalProductsCount+</span>
@@ -87,6 +102,8 @@
             </div>
         </div>
         <div class="hero-visual">
+            <div class="hero-orbit hero-orbit-1"></div>
+            <div class="hero-orbit hero-orbit-2"></div>
             <div class="hero-image-glow"></div>
             <img src="/images/water-filter.svg" alt="Фильтр для воды" class="hero-image" />
             <div class="hero-floating-badges">
@@ -114,6 +131,23 @@
         <input type="text" name="searchTerm" placeholder="Поиск фильтров, картриджей, брендов..." aria-label="Поиск" />
         <button type="submit">Найти</button>
     </form>
+
+    <div class="hero-marquee" aria-hidden="true">
+        <div class="hero-marquee-track">
+            <span>Океаническая свежесть в каждом глотке</span>
+            <span>•</span>
+            <span>Подбор по сценарию жизни</span>
+            <span>•</span>
+            <span>Доставка по Беларуси</span>
+            <span>•</span>
+            <span>Гарантия оригинальности</span>
+            @foreach (var categoryName in spotlightCategoryNames)
+            {
+                <span>•</span>
+                <span>@categoryName</span>
+            }
+        </div>
+    </div>
 </section>
 
 <!-- ═══════ FILTER TYPE CATEGORIES ═══════ -->
@@ -149,6 +183,59 @@
                 </span>
             </a>
         }
+    </div>
+</section>
+
+<!-- ═══════ WATER JOURNEY ═══════ -->
+<section class="landing-section landing-journey">
+    <div class="section-header">
+        <h2 class="section-title">Ваш путь к чистой воде</h2>
+        <p class="section-subtitle">От анализа задачи до стабильного вкуса воды — за три шага</p>
+    </div>
+
+    <div class="journey-grid">
+        <article class="journey-card">
+            <div class="journey-step">01</div>
+            <h3>Сценарий потребления</h3>
+            <p>Выберите, где нужна фильтрация: питьевая вода, кухня, душ или вся квартира.</p>
+        </article>
+        <article class="journey-card">
+            <div class="journey-step">02</div>
+            <h3>Точный формат системы</h3>
+            <p>Подбираем решение по бюджету, ресурсу картриджей и требуемому уровню очистки.</p>
+        </article>
+        <article class="journey-card">
+            <div class="journey-step">03</div>
+            <h3>Долгосрочный комфорт</h3>
+            <p>Оформляете заказ и спокойно пользуетесь системой с понятным графиком замены.</p>
+        </article>
+    </div>
+</section>
+
+<!-- ═══════ INSIGHTS ═══════ -->
+<section class="landing-section landing-insights">
+    <div class="section-header">
+        <h2 class="section-title">Популярные сценарии выбора</h2>
+        <p class="section-subtitle">Выберите вашу задачу и перейдите сразу к подходящему типу фильтра</p>
+    </div>
+
+    <div class="insights-grid">
+        <a class="insight-card insight-card-featured" href="/catalog?filterType=2">
+            <div class="insight-tag">Топ выбор</div>
+            <h3>Максимальная очистка</h3>
+            <p>Системы обратного осмоса для стабильного вкуса и глубокой фильтрации.</p>
+            <span class="insight-link">К обратному осмосу</span>
+        </a>
+        <a class="insight-card" href="/catalog?filterType=1">
+            <h3>Для кухни каждый день</h3>
+            <p>Компактные системы под мойку с удобным обслуживанием.</p>
+            <span class="insight-link">Смотреть модели</span>
+        </a>
+        <a class="insight-card" href="/catalog?filterType=3">
+            <h3>Защита техники дома</h3>
+            <p>Магистральные решения для труб, бойлеров и стиральных машин.</p>
+            <span class="insight-link">Перейти в раздел</span>
+        </a>
     </div>
 </section>
 
@@ -242,11 +329,17 @@
 <section class="landing-cta">
     <div class="cta-content">
         <h2>Готовы к чистой воде?</h2>
-        <p>Откройте каталог и найдите свой идеальный фильтр уже сегодня</p>
-        <a href="/catalog" class="hero-btn hero-btn-primary">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Перейти в каталог
-        </a>
+        <p>Соберите систему, которая подходит именно вашему ритму жизни — от компактных решений до комплексной очистки дома</p>
+        <div class="cta-actions">
+            <a href="/catalog" class="hero-btn hero-btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Перейти в каталог
+            </a>
+            <a href="#categories" class="hero-btn hero-btn-secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+                Подобрать по типу
+            </a>
+        </div>
     </div>
 </section>
 
@@ -311,6 +404,8 @@
             applyStagger(".advantage-card", ".advantages-grid", 0.1);
             applyStagger(".brand-card", ".brands-grid", 0.05);
             applyStagger(".product-card", ".products-grid", 0.07);
+            applyStagger(".journey-card", ".journey-grid", 0.12);
+            applyStagger(".insight-card", ".insights-grid", 0.1);
 
             // Observer for revealing elements on scroll
             const revealObserver = new IntersectionObserver((entries) => {
@@ -331,6 +426,8 @@
                 ".filter-type-tabs",
                 ".ft-card",
                 ".advantage-card",
+                ".journey-card",
+                ".insight-card",
                 ".brand-card",
                 ".product-card",
                 ".landing-cta"

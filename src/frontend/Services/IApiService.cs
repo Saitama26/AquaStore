@@ -38,6 +38,10 @@ public interface IApiService
     Task<bool> CreateProductAsync(AdminProductCreateViewModel model, CancellationToken cancellationToken = default);
     Task<bool> UpdateProductAsync(AdminProductUpdateViewModel model, CancellationToken cancellationToken = default);
     Task<bool> DeleteProductAsync(Guid productId, CancellationToken cancellationToken = default);
+    Task<bool> UpdateProductStockAsync(Guid productId, int quantity, CancellationToken cancellationToken = default);
+    Task<bool> BulkImportCategoriesAsync(IReadOnlyList<AdminBulkCategoryImportItemViewModel> categories, CancellationToken cancellationToken = default);
+    Task<bool> BulkImportBrandsAsync(IReadOnlyList<AdminBulkBrandImportItemViewModel> brands, CancellationToken cancellationToken = default);
+    Task<bool> BulkImportProductsAsync(IReadOnlyList<AdminBulkProductImportItemViewModel> products, CancellationToken cancellationToken = default);
 
     // Users (admin)
     Task<PagedResponse<AdminUserViewModel>> GetUsersAsync(
@@ -47,7 +51,8 @@ public interface IApiService
     Task<bool> UpdateUserAsync(AdminUserViewModel model, CancellationToken cancellationToken = default);
 
     // Cart
-    Task<bool> AddToCartAsync(Guid productId, int quantity = 1, CancellationToken cancellationToken = default);
+    Task<ApiOperationResult> AddToCartAsync(Guid productId, int quantity = 1, CancellationToken cancellationToken = default);
+    Task<ApiOperationResult> UpdateCartItemQuantityAsync(Guid productId, int quantity, CancellationToken cancellationToken = default);
     Task<bool> RemoveFromCartAsync(Guid productId, CancellationToken cancellationToken = default);
     Task<CartViewModel?> GetCartAsync(CancellationToken cancellationToken = default);
 
@@ -60,11 +65,24 @@ public interface IApiService
         int pageSize = 10,
         CancellationToken cancellationToken = default);
     Task<OrderDetailViewModel?> GetOrderByIdAsync(Guid orderId, CancellationToken cancellationToken = default);
+    Task<(byte[]? Content, string? FileName, string? ContentType)> DownloadOrderReceiptPdfAsync(
+        Guid orderId,
+        CancellationToken cancellationToken = default);
+    Task<bool> UpdateOrderStatusAsync(
+        Guid orderId,
+        int status,
+        CancellationToken cancellationToken = default);
     Task<PagedResponse<AdminOrderListItemViewModel>> GetAllOrdersAsync(
         int pageNumber = 1,
         int pageSize = 50,
         CancellationToken cancellationToken = default);
+    Task<AdminOrderAnalyticsViewModel?> GetOrderAnalyticsAsync(
+        int topProducts = 10,
+        int topUsers = 10,
+        CancellationToken cancellationToken = default);
     Task<(byte[]? Content, string? FileName, string? ContentType)> ExportOrdersCsvAsync(
+        CancellationToken cancellationToken = default);
+    Task<(byte[]? Content, string? FileName, string? ContentType)> ExportOrderAnalyticsCsvAsync(
         CancellationToken cancellationToken = default);
         
     // Auth (если нужно)
@@ -75,7 +93,7 @@ public interface IApiService
         string confirmPassword,
         string firstName,
         string lastName,
-        string? phone,
+        string phone,
         CancellationToken cancellationToken = default);
     Task<ApiOperationResult> ConfirmRegistrationAsync(
         string email,
@@ -84,6 +102,7 @@ public interface IApiService
 
     // Profile
     Task<UserProfileViewModel?> GetProfileAsync(CancellationToken cancellationToken = default);
+    Task<ApiOperationResult> AddAddressAsync(AddAddressViewModel model, CancellationToken cancellationToken = default);
     Task<ApiOperationResult> UpdateProfileAsync(
         string firstName,
         string lastName,

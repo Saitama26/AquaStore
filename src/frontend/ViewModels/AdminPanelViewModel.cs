@@ -7,6 +7,7 @@ public class AdminPanelViewModel
     public IReadOnlyList<BrandViewModel> Brands { get; set; } = Array.Empty<BrandViewModel>();
     public PagedResponse<AdminOrderListItemViewModel> Orders { get; set; } = new();
     public IReadOnlyList<AdminUserViewModel> Users { get; set; } = Array.Empty<AdminUserViewModel>();
+    public AdminOrderAnalyticsViewModel Analytics { get; set; } = new();
     public string ActiveTab { get; set; } = "products";
 
     // Pagination helpers

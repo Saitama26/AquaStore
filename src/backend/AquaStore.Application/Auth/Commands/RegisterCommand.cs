@@ -17,7 +17,7 @@ public sealed record RegisterCommand(
     string ConfirmPassword,
     string FirstName,
     string LastName,
-    string? Phone = null) : ICommand<RegisterStartResponse>;
+    string Phone) : ICommand<RegisterStartResponse>;
 
 public sealed record RegisterStartResponse(
     string Email,

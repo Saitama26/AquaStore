@@ -110,6 +110,28 @@ public class AuthController : ApiController
     }
 
     /// <summary>
+    /// Добавить адрес в профиль текущего пользователя
+    /// </summary>
+    [HttpPost("profile/addresses")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> AddAddress([FromBody] AddAddressRequest request)
+    {
+        var command = new AddUserAddressCommand(
+            request.City,
+            request.Street,
+            request.Building,
+            request.Apartment,
+            request.PostalCode,
+            request.IsDefault);
+
+        var result = await Sender.Send(command);
+        return HandleResult(result);
+    }
+
+    /// <summary>
     /// Обновление токена
     /// </summary>
     [HttpPost("refresh")]

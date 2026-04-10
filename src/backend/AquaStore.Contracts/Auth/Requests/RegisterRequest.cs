@@ -9,5 +9,5 @@ public sealed record RegisterRequest(
     string ConfirmPassword,
     string FirstName,
     string LastName,
-    string? Phone = null);
+    string Phone);
 

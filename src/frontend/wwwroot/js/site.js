@@ -117,7 +117,19 @@ async function addToCart(productId, triggerElement = null, options = {}) {
             showNotification('Войдите в аккаунт, чтобы добавить товар', 'info');
             return false;
         } else {
-            showNotification('Ошибка при добавлении товара в корзину', 'error');
+            let errorMessage = 'Ошибка при добавлении товара в корзину';
+            try {
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    const data = await response.json();
+                    if (data?.message) {
+                        errorMessage = data.message;
+                    }
+                }
+            } catch {
+                // ignore parse errors
+            }
+
+            showNotification(errorMessage, 'error');
             return false;
         }
     } catch (error) {
@@ -142,10 +154,11 @@ async function updateCartCount() {
     try {
         const response = await fetch('/Cart/GetCount');
         if (response.ok) {
-            const count = await response.text();
-            const cartBadge = document.querySelector('.cart-count');
+            const count = parseInt(await response.text(), 10) || 0;
+            const cartBadge = document.querySelector('.cart-button-count');
             if (cartBadge) {
-                cartBadge.textContent = count;
+                cartBadge.textContent = `${count}`;
+                cartBadge.classList.toggle('is-hidden', count <= 0);
             }
         }
     } catch (error) {
@@ -268,6 +281,7 @@ function initNavigationDrawer() {
 document.addEventListener('DOMContentLoaded', () => {
     initNavigationDrawer();
     initInfiniteScroll();
+    updateCartCount();
 });
 
 let isLoadingProducts = false;

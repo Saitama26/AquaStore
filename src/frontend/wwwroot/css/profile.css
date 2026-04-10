@@ -373,6 +373,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .order-receipt-link {
@@ -391,6 +393,15 @@
 
 .order-receipt-link:hover {
     background: rgba(47, 140, 255, 0.25);
+}
+
+.order-receipt-link-pdf {
+    background: rgba(94, 234, 212, 0.15);
+    color: #67e8f9;
+}
+
+.order-receipt-link-pdf:hover {
+    background: rgba(94, 234, 212, 0.25);
 }
 
 /* ---------- SETTINGS ---------- */

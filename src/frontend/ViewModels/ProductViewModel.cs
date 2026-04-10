@@ -26,6 +26,7 @@ public class ProductViewModel
     public string BrandName { get; set; } = string.Empty;
     public int FilterType { get; set; }
     public string FilterTypeName { get; set; } = string.Empty;
+    public int StockQuantity { get; set; }
     public bool IsInStock { get; set; }
     public bool IsFeatured { get; set; }
     public double? AverageRating { get; set; }

@@ -7,6 +7,15 @@ namespace frontend.Controllers;
 
 public class CartController : Controller
 {
+    private static readonly string[] AddressModelStateKeys =
+    {
+        "Order.City",
+        "Order.Street",
+        "Order.Building",
+        "Order.Apartment",
+        "Order.PostalCode"
+    };
+
     private readonly IApiService _apiService;
     private readonly ILogger<CartController> _logger;
 
@@ -27,11 +36,13 @@ public class CartController : Controller
             }
 
             var result = await _apiService.AddToCartAsync(productId, quantity);
-            if (result)
+            if (result.Success)
             {
                 return Ok(new { success = true, message = "Товар добавлен в корзину" });
             }
-            return BadRequest(new { success = false, message = "Не удалось добавить товар в корзину" });
+
+            var message = ResolveStockAwareMessage(result, "Не удалось добавить товар в корзину");
+            return BadRequest(new { success = false, message });
         }
         catch (Exception ex)
         {
@@ -121,6 +132,21 @@ public class CartController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
+            var profile = await _apiService.GetProfileAsync();
+            model.SavedAddresses = profile?.Addresses
+                ?.OrderByDescending(a => a.IsDefault)
+                .ThenBy(a => a.Id)
+                .ToList()
+                ?? new List<UserAddressViewModel>();
+
+            if (model.SavedAddresses.Count > 0)
+            {
+                var selectedAddress = model.SavedAddresses.First();
+                model.SelectedAddressId = selectedAddress.Id;
+                model.UseManualAddress = false;
+                ApplyAddressToOrder(model.Order, selectedAddress);
+            }
+
             return View(model);
         }
         catch (Exception ex)
@@ -141,6 +167,40 @@ public class CartController : Controller
         {
             var cart = await _apiService.GetCartAsync(cancellationToken);
             model.Cart = cart ?? new CartViewModel();
+
+            var profile = await _apiService.GetProfileAsync(cancellationToken);
+            model.SavedAddresses = profile?.Addresses
+                ?.OrderByDescending(a => a.IsDefault)
+                .ThenBy(a => a.Id)
+                .ToList()
+                ?? new List<UserAddressViewModel>();
+
+            if (!model.UseManualAddress)
+            {
+                foreach (var key in AddressModelStateKeys)
+                {
+                    ModelState.Remove(key);
+                }
+
+                if (model.SelectedAddressId is null)
+                {
+                    ModelState.AddModelError(nameof(model.SelectedAddressId), "Выберите сохраненный адрес или введите адрес вручную.");
+                }
+                else
+                {
+                    var selectedAddress = model.SavedAddresses.FirstOrDefault(a => a.Id == model.SelectedAddressId.Value);
+                    if (selectedAddress is null)
+                    {
+                        ModelState.AddModelError(nameof(model.SelectedAddressId), "Выбранный адрес не найден.");
+                    }
+                    else
+                    {
+                        ApplyAddressToOrder(model.Order, selectedAddress);
+                    }
+                }
+
+                TryValidateModel(model.Order, nameof(model.Order));
+            }
 
             model.Order.SelectedProductIds = model.Order.SelectedProductIds
                 .Where(id => id != Guid.Empty)
@@ -170,10 +230,30 @@ public class CartController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
+            if (model.UseManualAddress && model.SaveAddressToProfile)
+            {
+                var addAddressResult = await _apiService.AddAddressAsync(new AddAddressViewModel
+                {
+                    City = model.Order.City,
+                    Street = model.Order.Street,
+                    Building = model.Order.Building,
+                    Apartment = model.Order.Apartment,
+                    PostalCode = model.Order.PostalCode,
+                    IsDefault = model.SavedAddresses.Count == 0
+                }, cancellationToken);
+
+                if (!addAddressResult.Success)
+                {
+                    ModelState.AddModelError(string.Empty, addAddressResult.Message ?? "Не удалось сохранить адрес в профиле.");
+                    return View(model);
+                }
+            }
+
             var result = await _apiService.CreateOrderAsync(model.Order, cancellationToken);
             if (!result.Success || result.Data is null)
             {
-                ModelState.AddModelError(string.Empty, result.Message ?? "Не удалось оформить заказ.");
+                var message = ResolveStockAwareMessage(result, "Не удалось оформить заказ.");
+                ModelState.AddModelError(string.Empty, message);
                 return View(model);
             }
 
@@ -225,6 +305,61 @@ public class CartController : Controller
             _logger.LogError(ex, "Ошибка при удалении товара из корзины: {ProductId}", productId);
             return StatusCode(500, new { success = false, message = "Произошла ошибка" });
         }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> UpdateQuantity(Guid productId, int quantity)
+    {
+        try
+        {
+            if (quantity <= 0)
+            {
+                return BadRequest(new { success = false, message = "Количество должно быть больше нуля." });
+            }
+
+            var result = await _apiService.UpdateCartItemQuantityAsync(productId, quantity);
+            if (result.Success)
+            {
+                return Ok(new { success = true, message = "Количество обновлено." });
+            }
+
+            var message = ResolveStockAwareMessage(result, "Не удалось обновить количество товара.");
+            return BadRequest(new { success = false, message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Ошибка при обновлении количества товара в корзине: {ProductId}", productId);
+            return StatusCode(500, new { success = false, message = "Произошла ошибка" });
+        }
+    }
+
+    private static string ResolveStockAwareMessage(ApiOperationResult result, string fallback)
+    {
+        if (result.Errors?.Any(e => e.Code == "Product.InsufficientStock") == true)
+        {
+            return "Товара нет в наличии или недостаточно на складе.";
+        }
+
+        return result.Message ?? fallback;
+    }
+
+    private static void ApplyAddressToOrder(CreateOrderViewModel order, UserAddressViewModel address)
+    {
+        order.City = address.City;
+        order.Street = address.Street;
+        order.Building = address.Building;
+        order.Apartment = address.Apartment;
+        order.PostalCode = address.PostalCode;
+    }
+
+    private static string ResolveStockAwareMessage<T>(ApiOperationResult<T> result, string fallback)
+    {
+        if (result.Errors?.Any(e => e.Code == "Product.InsufficientStock") == true)
+        {
+            return "Товара нет в наличии или недостаточно на складе.";
+        }
+
+        return result.Message ?? fallback;
     }
 }
 

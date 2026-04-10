@@ -25,7 +25,8 @@ public class RegisterViewModel
     [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Телефон обязателен")]
     [Phone(ErrorMessage = "Некорректный телефон")]
-    public string? Phone { get; set; }
+    public string Phone { get; set; } = string.Empty;
 }
 
