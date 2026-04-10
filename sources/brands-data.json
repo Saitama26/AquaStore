@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Atoll",
+    "country": "США",
+    "description": "Американский производитель систем обратного осмоса",
+    "websiteUrl": "https://atoll-filter.ru"
+  },
+  {
+    "name": "Барьер",
+    "country": "Россия",
+    "description": "Ведущий производитель фильтров для воды в России",
+    "websiteUrl": "https://barrier.ru"
+  },
+  {
+    "name": "Гейзер",
+    "country": "Россия",
+    "description": "Российский производитель систем очистки воды",
+    "websiteUrl": "https://geizer.com"
+  },
+  {
+    "name": "Новая Вода",
+    "country": "Украина",
+    "description": "Производитель систем очистки воды",
+    "websiteUrl": "https://novavoda.ua"
+  }
+]
